@@ -3,7 +3,7 @@ from functools import partial
 
 import flora
 import terrain
-import generators as gen
+import strategy.plainsgen as gen
 from nomad import *
 from plains import *
 
