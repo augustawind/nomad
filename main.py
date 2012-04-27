@@ -2,27 +2,50 @@ from curses import *
 from functools import partial
 
 import flora
+import terrain
+import generators as gen
 from nomad import *
 from plains import *
 
-VIEW_WIDTH = 18
-VIEW_HEIGHT = 18
+VIEW_WIDTH = 78
+VIEW_HEIGHT = 23
+
+PAIR_RED = 1
+PAIR_GREEN = 2
+PAIR_YELLOW = 3
+PAIR_BLUE = 4
+PAIR_MAGENTA = 5
+PAIR_CYAN = 6
+PAIR_WHITE = 7
 
 command = {
-    KEY_LEFT:  partial(move_nomad, 0, -1),
-    KEY_RIGHT: partial(move_nomad, 0, 1),
-    KEY_UP:    partial(move_nomad, -1, 0),
-    KEY_DOWN:  partial(move_nomad, 1, 0)
+    KEY_LEFT:  partial(move_nomad, -1, 0),
+    KEY_RIGHT: partial(move_nomad, 1, 0),
+    KEY_UP:    partial(move_nomad, 0, -1),
+    KEY_DOWN:  partial(move_nomad, 0, 1),
     }
 
-ent2chr = {
-    'nomad': '@',
-    'grass': '"',
+ent_display = {
+    'nomad': ('@', PAIR_YELLOW),
+    'grass': ('"', PAIR_GREEN),
+    'flower': ('*', PAIR_WHITE),
+    'earth': ('.', PAIR_WHITE),
+    'rock': ('0', PAIR_CYAN),
     }
 
 def main(stdscr): 
-    nomad = Nomad()
-    plains = Plains.with_bg(nomad.los, flora.grass)
+    init_pair(PAIR_RED, COLOR_RED, -1)
+    init_pair(PAIR_GREEN, COLOR_GREEN, -1)
+    init_pair(PAIR_YELLOW, COLOR_YELLOW, -1)
+    init_pair(PAIR_BLUE, COLOR_BLUE, -1)
+    init_pair(PAIR_MAGENTA, COLOR_MAGENTA, -1)
+    init_pair(PAIR_CYAN, COLOR_CYAN, -1)
+    init_pair(PAIR_WHITE, COLOR_WHITE, -1)
+
+    nomad = Nomad(los=9)
+    plains = Plains.with_floor(nomad.los, terrain.earth,
+                               gen.chance({90: flora.grass, 10: flora.flower,
+                                           1: terrain.rock}))
     plains.add_entity(nomad, 0, 0)
 
     plains_win = newwin(VIEW_HEIGHT, VIEW_WIDTH, 0, 0) 
@@ -36,13 +59,6 @@ def main(stdscr):
             command[key](nomad, plains)
 
 
-'''
-def get_player_name(win):
-    win.addstr("What is your name? ")
-    return win.getstr()
-'''
-
-
 def update(win, nomad, plains):
     win.clear()
 
@@ -50,18 +66,22 @@ def update(win, nomad, plains):
     coords = range(-radius, radius + 1)
     for y in coords:
         for x in coords:
-            distance = math.sqrt((x ** 2) + (y ** 2))
-            if distance < radius:
+            if (x, y) in plains.entities:
                 entity = plains.get_entity(x, y)
-                char = ent2chr[entity.name]
+                char, color = ent_display[entity.name]
             else:
                 char = ' '
-            win.addnstr(y + radius, x + radius, char, 1)
+                color = PAIR_WHITE
+            win.addnstr(y + radius, x + radius, char, 1, color_pair(color))
 
     win.refresh()
 
-
 if __name__ == '__main__':
     stdscr = initscr()
+    start_color()
+    use_default_colors()
+    curs_set(0)
+
     wrapper(main)
 
+    curs_set(1)

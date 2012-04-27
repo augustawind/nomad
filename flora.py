@@ -1,3 +1,4 @@
 from entity import *
 
-grass = Entity("grass")
+grass = Entity("grass", True)
+flower = Entity("flower", True)
