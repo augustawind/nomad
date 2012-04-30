@@ -2,6 +2,7 @@ from entity import *
 from util import *
 
 class Plains:
+    '''A shifting world that generates itself as it moves.'''
 
     def __init__(self, radius, entities, floor_entity, generate=None):
         self.radius = radius
@@ -19,28 +20,18 @@ class Plains:
         
         return cls(radius, entities, floor_entity, generate=generate)
 
-    def in_bounds(self, x, y, z=None):
+    def in_bounds(self, x, y):
+        '''Are the given x and y within the plains's borders?'''
         return distance(0, 0, x, y) <= self.radius
 
     def z_in_bounds(self, x, y, z):
+        '''Does an entity exist at (x, y, z), given that at least one
+        exists at x and y?
+        '''
         return 0 <= z < len(self.entities[(x, y)])
 
-    def inform_entity(self, entity, x, y):
-        entity.x = x
-        entity.y = y 
-
-    def inform_all(self):
-        for xy, ents in self.entities.items():
-            for e in ents:
-                self.inform_entity(e, *xy)
-    
-    def get_fauna(self):
-        for entities in self.entities.values():
-            for entity in entities:
-                if entity.etype is FAUNA:
-                    yield entity
-
     def walkable_at(self, x, y):
+        '''Are all entities walkable at point (x, y)?'''
         xy = (x, y)
         return (xy in self.entities and
                 all(e.walkable for e in self.entities[xy]))
@@ -51,7 +42,29 @@ class Plains:
     def get_coords(self):
         return self.entities.keys()
     
+    def get_fauna(self):
+        '''Return all entities with an etype of FAUNA.'''
+        for entities in self.entities.values():
+            for entity in entities:
+                if entity.etype is FAUNA:
+                    yield entity
+
+    @staticmethod
+    def inform_entity(entity, x, y):
+        '''Inform an entity of its x and y coordinate position.'''
+        entity.x = x
+        entity.y = y 
+
+    def inform_all(self):
+        '''Inform all entities of their x and y coordinate positions.'''
+        for xy, ents in self.entities.items():
+            for e in ents:
+                self.inform_entity(e, *xy)
+    
     def add_entity(self, entity, x, y, z=-1):
+        '''Add an entity at the given x, y, z. If z is out of bounds, append it
+        to the top.
+        '''
         xy = (x, y)
         if xy in self.entities:
             entities = self.entities[xy]
@@ -65,6 +78,9 @@ class Plains:
         self.inform_entity(entity, x, y)
 
     def pop_entity(self, x, y, z=-1):
+        '''Remove and return the entity at the given x, y, z. If z is out of
+        bounds, do the topmost entity. If no entity exists there, return None.
+        '''
         xy = (x, y)
         if xy in self.entities:
             ents = self.entities[xy]
@@ -77,10 +93,12 @@ class Plains:
             return entity
 
     def move_fromto(self, x1, y1, x2, y2, z1=-1, z2=-1):
+        '''Move the entity at (x1, y1, z1) to (z2, y2, z2).'''
         entity = self.pop_entity(x1, y1, z1)
         self.add_entity(entity, x2, y2, z2)
 
     def shift(self, dx, dy):
+        '''Shift the plains in the given x and y directions.'''
         if not (dx or dy) or (dx and dy):
             return
 
@@ -99,8 +117,6 @@ class Plains:
                 else:
                     del_coords.append(p1)
                     gen_coords.append(p2)
-                    
-            edge_coords = gen_coords if dx < 0 else del_coords
         elif dx:
             ys = set(y for x, y in self.entities)
             for y in ys:
