@@ -1,9 +1,10 @@
-from entity import Entity
+from fauna import Fauna
+from fauna_actions import idle
 
-class Nomad(Entity):
+class Nomad(Fauna):
 
     def __init__(self, los=5):
-        super().__init__('nomad', False)
+        super().__init__('nomad', False, idle())
         self.los = los
 
     def move(self, dx, dy):

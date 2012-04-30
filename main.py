@@ -9,8 +9,8 @@ from nomad import *
 from plains import *
 from util import *
 
-VIEW_WIDTH = 78
-VIEW_HEIGHT = 23
+PLAINS_WIN = (20, 20, 0, 0)
+STATUS_WIN = (20, 20, 0, 21)
 
 PAIR_RED = 1
 PAIR_GREEN = 2
@@ -60,6 +60,7 @@ def init_color_pairs():
 
 def main(stdscr): 
     init_color_pairs()
+
     nomad = Nomad(los=9)
     plains = Plains.with_floor(nomad.los, terrain.earth, gen.chance(
                                {90: flora.grass, 10: flora.flower,
@@ -67,12 +68,14 @@ def main(stdscr):
                                 2: terrain.rock, 1: fauna.yak}))
     plains.add_entity(nomad, 0, 0)
 
-    plains_win = curses.newwin(VIEW_HEIGHT, VIEW_WIDTH, 0, 0) 
+    plains_win = curses.newwin(*PLAINS_WIN) 
+    status_win = curses.newwin(*STATUS_WIN)
 
     display_dict = render_info()
     command_dict = player_commands()
     while True:
-        refresh(plains_win, display_dict, nomad, plains)
+        update_plains_display(plains_win, display_dict, nomad, plains)
+        update_status(status_win, nomad)
         stdscr.refresh()
 
         key = stdscr.getch()
@@ -82,7 +85,28 @@ def main(stdscr):
         update_fauna(nomad, plains)
 
 
-def refresh(win, display_dict, nomad, plains):
+def update_status(win, nomad):
+    win.clear()
+
+    y = 0
+    x = 3
+    ystep = 2
+    win.addstr(y, x, 'Nomad')
+
+    y += ystep
+    win.addstr(y, x, 'Satiation: ')
+    win.addstr('{:.0f}'.format(nomad.satiation))
+
+    y += ystep
+    win.addstr(y, x, 'Health: ')
+    win.addstr('{:.0f}'.format(nomad.health))
+
+    win.box()
+
+    win.refresh()
+
+
+def update_plains_display(win, display_dict, nomad, plains):
     win.clear()
 
     radius = nomad.los
