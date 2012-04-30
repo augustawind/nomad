@@ -1,5 +1,5 @@
-from entity import *
-from util import *
+from nomad.entity import *
+from nomad.util import *
 
 class Plains:
     '''A shifting world that generates itself as it moves.'''

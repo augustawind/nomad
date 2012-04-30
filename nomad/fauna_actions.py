@@ -1,6 +1,6 @@
 from random import randint
 
-from util import *
+from nomad.util import *
 
 def idle():
     def action(actor, nomad):

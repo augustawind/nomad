@@ -1,6 +1,6 @@
 import random as rand
 
-from util import *
+from nomad.util import *
 
 def background():
     def generate(plains, edge_coords):

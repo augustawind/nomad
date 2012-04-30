@@ -1,6 +1,6 @@
-from entity import Entity
-from etypes import *
-from fauna_actions import *
+from nomad.entity import Entity
+from nomad.etypes import *
+from nomad.fauna_actions import *
 
 MIN_SATIATION = 0
 MAX_SATIATION = 100

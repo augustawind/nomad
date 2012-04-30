@@ -1,5 +1,5 @@
-from fauna import Fauna
-from fauna_actions import idle
+from nomad.fauna import Fauna
+from nomad.fauna_actions import idle
 
 class Nomad(Fauna):
 

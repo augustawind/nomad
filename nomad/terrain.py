@@ -1,4 +1,4 @@
-from entity import *
+from nomad.entity import *
 
 class Terrain(Entity):
 
