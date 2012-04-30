@@ -1,5 +1,5 @@
-from nomad.fauna import Fauna
-from nomad.fauna_actions import idle
+from nomad.entity.fauna import Fauna
+from nomad.entity.fauna.actions import idle
 
 class Nomad(Fauna):
 
@@ -12,7 +12,3 @@ class Nomad(Fauna):
             return
         self.plains.shift(dx, dy)
         self.plains.move_fromto(self.x, self.y, self.x + dx, self.y + dy)
-
-
-def move_nomad(dx, dy, nomad):
-    nomad.move(dx, dy)

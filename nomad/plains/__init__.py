@@ -1,4 +1,5 @@
-from nomad.entity import *
+from nomad.entity.base import Entity
+from nomad.entity.etypes import *
 from nomad.util import *
 
 class Plains:

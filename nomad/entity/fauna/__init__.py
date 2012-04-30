@@ -1,6 +1,6 @@
-from nomad.entity import Entity
-from nomad.etypes import *
-from nomad.fauna_actions import *
+from nomad.entity.base import Entity
+from nomad.entity.etypes import *
+from .actions import *
 
 MIN_SATIATION = 0
 MAX_SATIATION = 100
@@ -14,7 +14,7 @@ HEALTH_DECAY = 0.025
 
 class Fauna(Entity):
 
-    def __init__(self, name, walkable, action, reaction=idle(),
+    def __init__(self, name, walkable, action, reaction=None,
                  satiation=MAX_SATIATION, health=MAX_HEALTH):
         super().__init__(name, walkable, FAUNA)
         self.action = action

@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from nomad.etypes import *
+from nomad.entity.etypes import *
 
 FoodData = namedtuple('FoodData', 'satiation nutrition')
 

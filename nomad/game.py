@@ -1,12 +1,11 @@
 import curses
 from functools import partial
 
-from nomad import fauna
-from nomad import flora
-from nomad import terrain
-from nomad import plainsgen as gen
-from nomad.nomad import *
-from nomad.plains import *
+from nomad.entity import fauna
+from nomad.entity import flora
+from nomad.entity import terrain
+from nomad.nomad import Nomad
+from nomad.plains import Plains, gen
 from nomad.util import *
 
 PLAINS_WIN = (20, 20, 0, 0)
@@ -107,6 +106,10 @@ def update_plains_window(win, display_dict, nomad, plains):
 def update_fauna(nomad, plains):
     for entity in tuple(plains.get_fauna()):
         entity.update(nomad)
+
+
+def move_nomad(dx, dy, nomad):
+    nomad.move(dx, dy)
 
 
 def player_commands():
