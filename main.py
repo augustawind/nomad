@@ -73,7 +73,7 @@ def main(stdscr):
 
         key = stdscr.getch()
         if key in command_dict:
-            command_dict[key](nomad, plains)
+            command_dict[key](nomad)
 
         update_fauna(nomad, plains)
 
@@ -99,7 +99,7 @@ def refresh(win, display_dict, nomad, plains):
 
 def update_fauna(nomad, plains):
     for entity in tuple(plains.get_fauna()):
-        entity.update(nomad, plains)
+        entity.update(nomad)
 
 
 if __name__ == '__main__':

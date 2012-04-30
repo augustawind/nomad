@@ -6,16 +6,16 @@ DIR_UP = (0, -1)
 DIR_DOWN = (0, 1)
 
 def idle():
-    def action(actor, nomad, plains):
+    def action(actor, nomad):
         pass
     return action
 
 def shuffle():
     dirs = (DIR_LEFT, DIR_RIGHT, DIR_UP, DIR_DOWN)
-    def action(actor, nomad, plains):
+    def action(actor, nomad):
         i = randint(0, 3)
         dxy = dirs[i]
-        actor.move(plains, *dxy)
+        actor.move(*dxy)
     return action
 
 

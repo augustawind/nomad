@@ -10,7 +10,7 @@ class Plains:
         self.floor_entity = floor_entity
         self.generate = generate
 
-        self._inform_all()
+        self._init_entities(self.entities)
 
     @classmethod
     def with_floor(cls, radius, floor_entity, generate=None):
@@ -20,6 +20,33 @@ class Plains:
         
         return cls(radius, entities, floor_entity, generate=generate)
 
+    @staticmethod
+    def _iter_entities(entities):
+        for (x, y), ents in entities.items():
+            for z, e in enumerate(ents):
+                yield (x, y, z), e
+
+    @staticmethod
+    def _inform_entity(entity, x, y):
+        '''Inform an entity of its xy positon.'''
+        entity.x = x
+        entity.y = y 
+
+    @classmethod
+    def _inform_entities(cls, entities):
+        '''Inform many  entities of their xy positions.'''
+        for (x, y, z), e in cls._iter_entities(entities):
+            e.x = x
+            e.y = y
+
+    def _init_entity(self, entity, x, y):
+        entity.plains = self
+        self._inform_entity(entity, x, y)
+
+    def _init_entities(self, entities):
+        for (x, y, z), e in self._iter_entities(entities):
+            self._init_entity(e, x, y)
+    
     def in_bounds(self, x, y):
         '''Are the given x and y within the plains's borders?'''
         return distance(0, 0, x, y) <= self.radius
@@ -49,18 +76,6 @@ class Plains:
                 if entity.etype is FAUNA:
                     yield entity
 
-    @staticmethod
-    def _inform_entity(entity, x, y):
-        '''Inform an entity of its x and y coordinate position.'''
-        entity.x = x
-        entity.y = y 
-
-    def _inform_all(self):
-        '''Inform all entities of their x and y coordinate positions.'''
-        for xy, ents in self.entities.items():
-            for e in ents:
-                self._inform_entity(e, *xy)
-    
     def add_entity(self, entity, x, y, z=-1):
         '''Add an entity at the given x, y, z. If z is out of bounds, append it
         to the top.
@@ -75,11 +90,11 @@ class Plains:
         elif self.in_bounds(x, y):
             self.entities[xy] = [entity]
 
-        self._inform_entity(entity, x, y)
+        self._init_entity(entity, x, y)
 
     def pop_entity(self, x, y, z=-1):
         '''Remove and return the entity at the given x, y, z. If z is out of
-        bounds, do the topmost entity. If no entity exists there, return None.
+        bounds, pop the topmost entity. If no entity exists there, return None.
         '''
         xy = (x, y)
         if xy in self.entities:
@@ -93,7 +108,7 @@ class Plains:
             return entity
 
     def move_fromto(self, x1, y1, x2, y2, z1=-1, z2=-1):
-        '''Move the entity at (x1, y1, z1) to (z2, y2, z2).'''
+        '''Remove the entity at (x1, y1, z1) and add it to (x2, y2, z2).'''
         entity = self.pop_entity(x1, y1, z1)
         self.add_entity(entity, x2, y2, z2)
 
@@ -139,6 +154,7 @@ class Plains:
             new_entities[(x - dx , y - dy)] = self.entities[p]
 
         edge_entities = self.generate(self, gen_coords)
+        self._init_entities(edge_entities)
+        self._inform_entities(new_entities)
         new_entities.update(edge_entities)
         self.entities = new_entities
-        self._inform_all()

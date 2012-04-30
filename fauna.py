@@ -9,8 +9,8 @@ class Fauna(Entity):
         self.action = action
         self.reaction = reaction
 
-    def update(self, nomad, plains):
-        self.action(self, nomad, plains)
+    def update(self, nomad):
+        self.action(self, nomad)
 
 
 def yak():
