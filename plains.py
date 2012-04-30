@@ -10,7 +10,7 @@ class Plains:
         self.floor_entity = floor_entity
         self.generate = generate
 
-        self.inform_all()
+        self._inform_all()
 
     @classmethod
     def with_floor(cls, radius, floor_entity, generate=None):
@@ -50,16 +50,16 @@ class Plains:
                     yield entity
 
     @staticmethod
-    def inform_entity(entity, x, y):
+    def _inform_entity(entity, x, y):
         '''Inform an entity of its x and y coordinate position.'''
         entity.x = x
         entity.y = y 
 
-    def inform_all(self):
+    def _inform_all(self):
         '''Inform all entities of their x and y coordinate positions.'''
         for xy, ents in self.entities.items():
             for e in ents:
-                self.inform_entity(e, *xy)
+                self._inform_entity(e, *xy)
     
     def add_entity(self, entity, x, y, z=-1):
         '''Add an entity at the given x, y, z. If z is out of bounds, append it
@@ -75,7 +75,7 @@ class Plains:
         elif self.in_bounds(x, y):
             self.entities[xy] = [entity]
 
-        self.inform_entity(entity, x, y)
+        self._inform_entity(entity, x, y)
 
     def pop_entity(self, x, y, z=-1):
         '''Remove and return the entity at the given x, y, z. If z is out of
@@ -141,4 +141,4 @@ class Plains:
         edge_entities = self.generate(self, gen_coords)
         new_entities.update(edge_entities)
         self.entities = new_entities
-        self.inform_all()
+        self._inform_all()
