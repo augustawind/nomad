@@ -9,9 +9,7 @@ class Plains:
         self.floor_entity = floor_entity
         self.generate = generate
 
-        for xy, ents in self.entities.items():
-            for e in ents:
-                self.inform_entity(e, *xy)
+        self.inform_all()
 
     @classmethod
     def with_floor(cls, radius, floor_entity, generate=None):
@@ -21,8 +19,11 @@ class Plains:
         
         return cls(radius, entities, floor_entity, generate=generate)
 
-    def in_bounds(self, x, y):
+    def in_bounds(self, x, y, z=None):
         return distance(0, 0, x, y) <= self.radius
+
+    def z_in_bounds(self, x, y, z):
+        return 0 <= z < len(self.entities[(x, y)])
 
     def inform_entity(self, entity, x, y):
         entity.x = x
@@ -54,10 +55,10 @@ class Plains:
         xy = (x, y)
         if xy in self.entities:
             entities = self.entities[xy]
-            if z < 0 or z >= len(entities):
-                entities.append(entity)
-            else:
+            if self.z_in_bounds(x, y, z):
                 entities.insert(z, entity)
+            else:
+                entities.append(entity)
         elif self.in_bounds(x, y):
             self.entities[xy] = [entity]
 

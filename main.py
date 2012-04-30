@@ -23,11 +23,11 @@ PAIR_WHITE = 7
 KEY = ord
 
 command = {
-    KEY_LEFT:  partial(move_nomad, *DIR_LEFT),
-    KEY_RIGHT: partial(move_nomad, *DIR_RIGHT),
-    KEY_UP:    partial(move_nomad, *DIR_UP),
-    KEY_DOWN:  partial(move_nomad, *DIR_DOWN),
-    KEY('s'):  lambda n, p: None,
+    KEY('h'): partial(move_nomad, *DIR_LEFT),
+    KEY('l'): partial(move_nomad, *DIR_RIGHT),
+    KEY('k'): partial(move_nomad, *DIR_UP),
+    KEY('j'): partial(move_nomad, *DIR_DOWN),
+    KEY('s'): lambda n, p: None,
     }
 
 ent_display = {
