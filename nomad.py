@@ -7,8 +7,10 @@ class Nomad(Entity):
         self.los = los
 
     def move(self, plains, dx, dy):
+        if not plains.walkable_at(self.x + dx, self.y + dy):
+            return
         plains.shift(dx, dy)
-        super().move(plains, dx, dy)
+        plains.move_fromto(self.x, self.y, self.x + dx, self.y + dy)
 
 
 def move_nomad(dx, dy, nomad, plains):
