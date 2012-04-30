@@ -47,7 +47,7 @@ class Fauna(Entity):
     health = property(_get_health, _set_health)
 
     def handle_low_health(self):
-        self.satiation = (LOW_HEALTH_LINE - self.health)
+        self.satiation -= (LOW_HEALTH_LINE - self.health)
 
     def eat(self, entity):
         '''Attempt to eat an entity. Return True if successful, else False.'''

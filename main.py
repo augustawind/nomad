@@ -73,7 +73,7 @@ def main(stdscr):
 
     display_dict = render_info()
     command_dict = player_commands()
-    while True:
+    while nomad.alive:
         update_plains_display(plains_win, display_dict, nomad, plains)
         update_status(status_win, nomad)
         stdscr.refresh()
@@ -83,6 +83,12 @@ def main(stdscr):
             command_dict[key](nomad)
 
         update_fauna(nomad, plains)
+
+    stdscr.clear()
+    stdscr.addstr(0, 0, "Game over.")
+    stdscr.addstr(1, 0, "The nomad's journey has ended.") 
+    stdscr.getch()
+    curses.endwin()
 
 
 def update_status(win, nomad):
