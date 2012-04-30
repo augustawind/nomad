@@ -5,9 +5,9 @@ import fauna
 import flora
 import terrain
 import plainsgen as gen
-from fauna_actions import DIR_LEFT, DIR_RIGHT, DIR_UP, DIR_DOWN
 from nomad import *
 from plains import *
+from util import *
 
 VIEW_WIDTH = 78
 VIEW_HEIGHT = 23

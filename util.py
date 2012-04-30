@@ -1,6 +1,11 @@
 import math
 from collections import namedtuple
 
+DIR_LEFT = (-1, 0)
+DIR_RIGHT = (1, 0)
+DIR_UP = (0, -1)
+DIR_DOWN = (0, 1)
+
 Point = namedtuple('Point', 'x y')
 
 def points_in_circle(radius):
