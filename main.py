@@ -28,7 +28,9 @@ def player_commands():
         KEY('l'): partial(move_nomad, *DIR_RIGHT),
         KEY('k'): partial(move_nomad, *DIR_UP),
         KEY('j'): partial(move_nomad, *DIR_DOWN),
-        KEY('s'): lambda n, p: None,
+        KEY('s'): lambda n: None,
+
+        KEY('e'): Nomad.eat_underfoot,
         }
 
 
@@ -40,6 +42,7 @@ def render_info():
         'earth': ('.', PAIR_WHITE),
         'rock': ('0', PAIR_CYAN),
         'yak': ('Y', PAIR_RED),
+        'mushroom' : ('?', PAIR_MAGENTA),
         }
 
 
@@ -60,6 +63,7 @@ def main(stdscr):
     nomad = Nomad(los=9)
     plains = Plains.with_floor(nomad.los, terrain.earth, gen.chance(
                                {90: flora.grass, 10: flora.flower,
+                                3: flora.mushroom,
                                 2: terrain.rock, 1: fauna.yak}))
     plains.add_entity(nomad, 0, 0)
 

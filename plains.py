@@ -63,6 +63,9 @@ class Plains:
         return (xy in self.entities and
                 all(e.walkable for e in self.entities[xy]))
 
+    def get_z(self, entity, x, y):
+        return self.entities[(x, y)].index(entity)
+
     def get_entity(self, x, y, z=-1):
         return self.entities[(x, y)][z]
 
