@@ -1,4 +1,4 @@
 from entity import *
 
-grass = Entity("grass", True)
-flower = Entity("flower", True)
+def grass(): return Entity("grass", True)
+def flower(): return Entity("flower", True)

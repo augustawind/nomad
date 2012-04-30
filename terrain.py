@@ -1,5 +1,7 @@
 from entity import *
 
-earth = Entity('earth', True)
-rock = Entity('rock', False)
+def earth():
+    return Entity('earth', True, 'terrain')
+def rock():
+    return Entity('rock', False, 'terrain')
 

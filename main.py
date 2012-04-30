@@ -1,9 +1,11 @@
 from curses import *
 from functools import partial
 
+import fauna
 import flora
 import terrain
 import strategy.plainsgen as gen
+from fauna_actions import DIR_LEFT, DIR_RIGHT, DIR_UP, DIR_DOWN
 from nomad import *
 from plains import *
 
@@ -19,10 +21,10 @@ PAIR_CYAN = 6
 PAIR_WHITE = 7
 
 command = {
-    KEY_LEFT:  partial(move_nomad, -1, 0),
-    KEY_RIGHT: partial(move_nomad, 1, 0),
-    KEY_UP:    partial(move_nomad, 0, -1),
-    KEY_DOWN:  partial(move_nomad, 0, 1),
+    KEY_LEFT:  partial(move_nomad, *DIR_LEFT),
+    KEY_RIGHT: partial(move_nomad, *DIR_RIGHT),
+    KEY_UP:    partial(move_nomad, *DIR_UP),
+    KEY_DOWN:  partial(move_nomad, *DIR_DOWN),
     }
 
 ent_display = {
@@ -31,6 +33,7 @@ ent_display = {
     'flower': ('*', PAIR_WHITE),
     'earth': ('.', PAIR_WHITE),
     'rock': ('0', PAIR_CYAN),
+    'yak': ('Y', PAIR_RED),
     }
 
 def main(stdscr): 
@@ -43,23 +46,24 @@ def main(stdscr):
     init_pair(PAIR_WHITE, COLOR_WHITE, -1)
 
     nomad = Nomad(los=9)
-    plains = Plains.with_floor(nomad.los, terrain.earth,
-                               gen.chance({90: flora.grass, 10: flora.flower,
-                                           1: terrain.rock}))
+    plains = Plains.with_floor(nomad.los, terrain.earth, gen.chance(
+                               {90: flora.grass, 10: flora.flower,
+                                2: terrain.rock, 1: fauna.yak}))
     plains.add_entity(nomad, 0, 0)
 
     plains_win = newwin(VIEW_HEIGHT, VIEW_WIDTH, 0, 0) 
 
     while True:
-        update(plains_win, nomad, plains)
+        refresh(plains_win, nomad, plains)
         stdscr.refresh()
 
         key = stdscr.getch()
         if key in command:
             command[key](nomad, plains)
 
+        update_fauna(nomad, plains)
 
-def update(win, nomad, plains):
+def refresh(win, nomad, plains):
     win.clear()
 
     radius = nomad.los
@@ -75,6 +79,11 @@ def update(win, nomad, plains):
             win.addnstr(y + radius, x + radius, char, 1, color_pair(color))
 
     win.refresh()
+
+
+def update_fauna(nomad, plains):
+    for entity in tuple(plains.get_fauna()):
+        entity.update(nomad, plains)
 
 if __name__ == '__main__':
     stdscr = initscr()
