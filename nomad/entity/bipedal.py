@@ -42,14 +42,16 @@ class Bipedal(Fauna):
         self.drop_right()
 
     def make_tool(self):
-        parts = frozenset(
-                part.name for part in (self.left_held, self.right_held)
-                if part is not None)
+        parts = frozenset(str(part) for part in
+                          (self.left_held, self.right_held))
 
         if parts not in self.tool_factory:
             return
-        self.left_held = None
-        self.right_held = None
 
+        if str(self.left_held) in parts:
+            self.left_held = None
+        if str(self.right_held) in parts:
+            self.right_held = None
+            
         tool = self.tool_factory[parts]()
         self._put_underfoot(tool)
