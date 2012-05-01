@@ -29,6 +29,9 @@ class Entity:
         '''Return the z coordinate and the entity just below the nomad.'''
         z = self.plains.get_z(self, self.x, self.y) - 1
         return z, self.plains.get_entity(self.x, self.y, z)
+    
+    def wait(self):
+        pass
 
     def move(self, dx, dy):
         '''Move the entity in the given direction on its plains.'''

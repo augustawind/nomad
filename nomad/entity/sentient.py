@@ -17,3 +17,21 @@ class Sentient(Fauna):
         else:
             return
         self.plains.pop_entity(self.x, self.y, z)
+
+    def _put_underfoot(self, entity):
+        if not entity:
+            return
+        z = self.plains.get_z(self, self.x, self.y)
+        self.plains.add_entity(entity, self.x, self.y, z)
+
+    def drop_left(self):
+        self._put_underfoot(self.left_held)
+        self.left_held = None
+
+    def drop_right(self):
+        self._put_underfoot(self.right_held)
+        self.right_held = None
+
+    def drop_all(self):
+        self.drop_left()
+        self.drop_right()
