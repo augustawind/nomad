@@ -1,6 +1,11 @@
 from nomad.entity.fauna import Fauna
+from nomad.entity.tool import spear
 
 class Bipedal(Fauna):
+
+    tool_factory = {
+        frozenset(('sharp rock', 'stick')): spear
+        }
 
     def __init__(self, name, walkable, action, reaction=None,
                  left_held=None, right_held=None, **kwargs):
@@ -35,3 +40,16 @@ class Bipedal(Fauna):
     def drop_all(self):
         self.drop_left()
         self.drop_right()
+
+    def make_tool(self):
+        parts = frozenset(
+                part.name for part in (self.left_held, self.right_held)
+                if part is not None)
+
+        if parts not in self.tool_factory:
+            return
+        self.left_held = None
+        self.right_held = None
+
+        tool = self.tool_factory[parts]()
+        self._put_underfoot(tool)

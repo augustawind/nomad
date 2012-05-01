@@ -1,5 +1,5 @@
 from nomad.entity.base import Entity
-from nomad.entity.etypes import *
+from nomad.entity.etypes import FAUNA
 from .actions import *
 
 MIN_SATIATION = 0

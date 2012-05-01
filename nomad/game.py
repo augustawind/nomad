@@ -1,9 +1,7 @@
 import curses
 from functools import partial
 
-from nomad.entity import fauna
-from nomad.entity import flora
-from nomad.entity import terrain
+from nomad.entity import fauna, flora, terrain, tool
 from nomad.nomad import Nomad
 from nomad.plains import Plains, gen
 from nomad.util import *
@@ -36,8 +34,8 @@ def main(stdscr):
     nomad = Nomad(los=9)
     plains = Plains.with_floor(nomad.los, terrain.earth, gen.chance(
                                {90: flora.grass, 10: flora.flower,
-                                3: flora.mushroom,
-                                2: terrain.rock, 1: fauna.yak}))
+                                3: flora.mushroom, 5: tool.stick,
+                                2: tool.sharp_rock, 1: fauna.yak}))
     plains.add_entity(nomad, 0, 0)
 
     plains_win = curses.newwin(*PLAINS_WIN) 
@@ -129,6 +127,7 @@ def player_commands():
         KEY('e'): Nomad.eat_underfoot,
         KEY('g'): Nomad.pickup_underfoot,
         KEY('d'): Nomad.drop_all,
+        KEY('m'): Nomad.make_tool,
         }
 
 
@@ -136,11 +135,14 @@ def render_info():
     return {
         'nomad': ('@', PAIR_YELLOW),
         'grass': ('"', PAIR_GREEN),
-        'flower': ('*', PAIR_WHITE),
+        'flower': ('*', PAIR_BLUE),
         'earth': ('.', PAIR_WHITE),
         'rock': ('0', PAIR_CYAN),
         'yak': ('Y', PAIR_RED),
         'mushroom' : ('?', PAIR_MAGENTA),
+        'sharp rock': ('>', PAIR_CYAN),
+        'stick': ('/', PAIR_WHITE),
+        'spear': ('|', PAIR_YELLOW),
         }
 
 
