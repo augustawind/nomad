@@ -4,6 +4,7 @@ from functools import partial
 from nomad.entity import fauna
 from nomad.entity import flora
 from nomad.entity import terrain
+from nomad.entity.sentient import Sentient
 from nomad.nomad import Nomad
 from nomad.plains import Plains, gen
 from nomad.util import *
@@ -48,7 +49,6 @@ def main(stdscr):
     while nomad.alive:
         update_plains_window(plains_win, display_dict, nomad, plains)
         update_status_window(status_win, nomad)
-        stdscr.refresh()
 
         key = stdscr.getch()
         if key in command_dict:
@@ -121,6 +121,7 @@ def player_commands():
         KEY('s'): lambda n: None,
 
         KEY('e'): Nomad.eat_underfoot,
+        KEY('g'): Sentient.pickup_underfoot,
         }
 
 

@@ -19,8 +19,8 @@ class Fauna(Entity):
         super().__init__(name, walkable, FAUNA)
         self.action = action
         self.reaction = reaction
-        self.satiation = satiation
-        self.health = health
+        self._satiation = satiation
+        self._health = health
 
     def update(self, nomad):
         self.action(self, nomad)
