@@ -64,22 +64,29 @@ def main(stdscr):
 
 def update_status_window(win, nomad):
     win.clear()
-
     y = 0
-    x = 3
-    ystep = 2
+    x = 2
+    ystep = 1
+
     win.addstr(y, x, 'Nomad')
 
+    y += ystep
+    win.addstr(y, x, 'Health: ')
+    win.addstr('{:.0f}'.format(nomad.health))
     y += ystep
     win.addstr(y, x, 'Satiation: ')
     win.addstr('{:.0f}'.format(nomad.satiation))
 
     y += ystep
-    win.addstr(y, x, 'Health: ')
-    win.addstr('{:.0f}'.format(nomad.health))
+
+    y += ystep
+    win.addstr(y, x, 'LH: ')
+    win.addstr(str(nomad.left_held))
+    y+= ystep
+    win.addstr(y, x, 'RH: ')
+    win.addstr(str(nomad.right_held))
 
     win.box()
-
     win.refresh()
 
 

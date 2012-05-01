@@ -2,25 +2,10 @@ N   O    M    A   D    <>     T     O     D     O
 -------------------------------------------------
 
 
-Implement carrying.
-^^^^^^^^^^^^^^^^^^^
-
-    #) Two hand slots.
-
-    #) Write ``Fauna.grab_underfoot`` method.
-       Attempts to pick up the entity underfoot with a spare hand.
-
-    #) Write ``Fauna.drop_left`` and ``Fauna.drop_right``.
-       Drops the currently held item in the left and right hands, resp.
-
-
 Implement tools and toolmaking.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    #) Write class ``Sentient``, deriving from ``Entity``.
-       Sentients can make tools.
-
-    #) Write ``Sentient.make_tool`` method.
+    #) Write ``Bipedal.make_tool`` method.
        Attempts to make a tool with one or two held entities and/or the
        entity underfoot.
 

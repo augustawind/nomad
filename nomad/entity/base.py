@@ -19,6 +19,9 @@ class Entity:
         self.y = None
         self.plains = None
 
+    def __str__(self):
+        return self.name
+
     def update(self, nomad):
         '''Move the entity a step forward in time. Does nothing, but
         subclasses can override this method to provide behavior.
