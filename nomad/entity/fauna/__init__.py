@@ -7,10 +7,7 @@ MAX_SATIATION = 100
 MIN_HEALTH = 0
 MAX_HEALTH = 100
 
-LOW_HEALTH_LINE = (MAX_HEALTH - MIN_HEALTH) // 2
-
 SATIATION_DECAY = 0.25
-HEALTH_DECAY = 0.025
 
 class Fauna(Entity):
 
@@ -25,10 +22,6 @@ class Fauna(Entity):
     def update(self, nomad):
         self.action(self, nomad)
         self.satiation -= SATIATION_DECAY
-        self.health -= HEALTH_DECAY 
-
-        if self.health < LOW_HEALTH_LINE:
-            self.handle_low_health()
 
     @property
     def alive(self):
@@ -45,9 +38,6 @@ class Fauna(Entity):
     def _set_health(self, x):
         self._health = max(MIN_HEALTH, min(MAX_HEALTH, x))
     health = property(_get_health, _set_health)
-
-    def handle_low_health(self):
-        self.satiation -= (LOW_HEALTH_LINE - self.health)
 
     def eat(self, entity):
         '''Attempt to eat an entity. Return True if successful, else False.'''

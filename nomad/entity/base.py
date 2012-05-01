@@ -4,7 +4,7 @@ from nomad.entity.etypes import *
 
 FoodData = namedtuple('FoodData', 'satiation nutrition')
 
-defaultFood = FoodData(35, 15)
+defaultFood = FoodData(15, 0)
 
 class Entity:
     '''A thing that exists in the plains.'''
