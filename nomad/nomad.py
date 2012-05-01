@@ -1,7 +1,7 @@
-from nomad.entity.sentient import Sentient
+from nomad.entity.bipedal import Bipedal
 from nomad.entity.fauna.actions import idle
 
-class Nomad(Sentient):
+class Nomad(Bipedal):
 
     def __init__(self, los=5):
         super().__init__('nomad', False, idle())

@@ -1,6 +1,6 @@
 from nomad.entity.fauna import Fauna
 
-class Sentient(Fauna):
+class Bipedal(Fauna):
 
     def __init__(self, name, walkable, action, reaction=None,
                  left_held=None, right_held=None, **kwargs):

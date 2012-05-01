@@ -4,8 +4,6 @@ from functools import partial
 from nomad.entity import fauna
 from nomad.entity import flora
 from nomad.entity import terrain
-from nomad.entity.base import Entity
-from nomad.entity.sentient import Sentient
 from nomad.nomad import Nomad
 from nomad.plains import Plains, gen
 from nomad.util import *
@@ -119,11 +117,11 @@ def player_commands():
         KEY('l'): partial(move_nomad, *DIR_RIGHT),
         KEY('k'): partial(move_nomad, *DIR_UP),
         KEY('j'): partial(move_nomad, *DIR_DOWN),
-        KEY('w'): Entity.wait,
+        KEY('w'): Nomad.wait,
 
         KEY('e'): Nomad.eat_underfoot,
-        KEY('g'): Sentient.pickup_underfoot,
-        KEY('d'): Sentient.drop_all,
+        KEY('g'): Nomad.pickup_underfoot,
+        KEY('d'): Nomad.drop_all,
         }
 
 
