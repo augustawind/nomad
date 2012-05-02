@@ -51,7 +51,7 @@ def main(stdscr):
         if key in command_dict:
             command_dict[key](nomad)
 
-        update_fauna(nomad, plains)
+        update_entities(nomad, plains)
 
     stdscr.clear()
     stdscr.addstr(0, 0, "Game over.")
@@ -107,8 +107,8 @@ def update_plains_window(win, display_dict, nomad, plains):
     win.refresh()
 
 
-def update_fauna(nomad, plains):
-    for entity in tuple(plains.get_fauna()):
+def update_entities(nomad, plains):
+    for entity in plains.get_entities():
         entity.update(nomad)
 
 

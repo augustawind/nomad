@@ -2,37 +2,40 @@ N   O    M    A   D    <>     T     O     D     O
 -------------------------------------------------
 
 
-Implement tools and toolmaking.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Implement Roles.
+^^^^^^^^^^^^^^^^
 
-    #) Write ``Bipedal.make_tool`` method.
-       Attempts to make a tool with one or two held entities and/or the
-       entity underfoot.
+    #) Write a Role class.
 
-    #) Write ``Tool`` deriving from entity.
-       Tools can be used to interact with entities on the plains in
-       different ways.
+    #) Remove Entity subclasses, replacing their functionality with
+       roles.
 
-    #) Write a spear tool that serves as a general purpose edge
-       (and could forseeably be useful as a weapon too).
-
-    #) Write 'stick' and 'sharp rock' entities.
-       Calling ``make_tool`` while holding the rock and standing on
-       the stick returns a spear.
 
 
 Implement hatchet-making.
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    #) Write a vine flora.
+    #) Write a reed flora.
 
     #) Write an axe head entity.
        Make it: make_tool while holding a sharp rock in each hand.
        Consumes one of the rocks.
 
     #) Write an axe tool, to chop trees.
-       Make it: make_tool while a vine, axe head, and stick are in
+       Make it: make_tool while a reed, axe head, and stick are in
        any combination of your tool slots and underfoot.
+
+
+Implement reach.
+^^^^^^^^^^^^^^^^
+
+    #) Write method Entity.in_reach.
+       Yields the entity underfoot plus any adjacent, unwalkable
+       entities.
+
+    #) Change all Entity methods that operate on the entity underfoot to
+       operate on the entity underfoot if possible, and otherwise to let
+       the player select an adjacent entity with the cursor.
 
 
 Implement hunting.

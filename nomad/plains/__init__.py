@@ -1,6 +1,6 @@
 from nomad.entity.base import Entity
-from nomad.entity.etypes import *
 from nomad.util import *
+
 
 class Plains:
     '''A shifting world that generates itself as it moves.'''
@@ -70,16 +70,16 @@ class Plains:
     def get_entity(self, x, y, z=-1):
         return self.entities[(x, y)][z]
 
-    def get_coords(self):
-        return self.entities.keys()
-    
-    def get_fauna(self):
-        '''Return all entities with an etype of FAUNA.'''
-        for entities in self.entities.values():
-            for entity in entities:
-                if entity.etype is FAUNA:
-                    yield entity
+    def get_entities(self):
+        for ents in self.entities.values():
+            for ent in ents:
+                yield ent
 
+    def get_coords(self):
+        for (x, y), ents in self.entities.items():
+            for z in range(len(ents)):
+                yield x, y, z
+    
     def add_entity(self, entity, x, y, z=-1):
         '''Add an entity at the given x, y, z. If z is out of bounds, append it
         to the top.
