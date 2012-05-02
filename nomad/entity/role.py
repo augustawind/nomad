@@ -28,11 +28,11 @@ class Edible(Role):
 
 class Tool(Role):
 
-    def __init__(self, entity, use_func):
-        self.use_func = use_func
+    def __init__(self, entity, on_use):
+        self.on_use = on_use
 
     def use_on(self, entity):
-        self.use_func(self.entity, entity)
+        self.on_use(self.entity, entity)
 
 
 class Active(Role):

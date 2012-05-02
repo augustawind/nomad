@@ -5,8 +5,6 @@ N   O    M    A   D    <>     T     O     D     O
 Implement Roles.
 ^^^^^^^^^^^^^^^^
 
-    #) Write a Role class.
-
     #) Remove Entity subclasses, replacing their functionality with
        roles.
 
