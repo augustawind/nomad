@@ -34,7 +34,11 @@ class Entity:
         '''Move the entity a step forward in time. Does nothing, but
         subclasses can override this method to provide behavior.
         '''
-        pass
+        for role in (getattr(self, a) for a in
+                     ('as_food', 'as_tool', 'as_actor', 'as_reactor',
+                      'as_mortal', 'as_tactile')):
+            if role:
+                role.update(nomad)
 
     def get_underfoot(self):
         '''Return the z coordinate and the entity just below the nomad.'''

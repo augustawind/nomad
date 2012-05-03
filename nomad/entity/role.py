@@ -41,7 +41,7 @@ class Tool(Role):
         self.on_use(self.entity, entity)
 
 
-class Active(Role):
+class Actor(Role):
 
     def __init__(self, action):
         super().__init__()
@@ -51,7 +51,7 @@ class Active(Role):
         self.action(self.entity, nomad)
 
 
-class Reactive(Role):
+class Reactor(Role):
 
     def __init__(self, action):
         super().__init__()

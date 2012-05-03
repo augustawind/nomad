@@ -8,6 +8,6 @@ class Flora(Entity):
         super().__init__(name, walkable, FLORA, as_food)
 
 
-def grass(): return Flora('grass', True, Edible(0, -5))
-def flower(): return Flora('flower', True, Edible(0, -1)) 
-def mushroom(): return Flora('mushroom', True, Edible(10, 1))
+def grass(): return Entity('grass', True, as_food=Edible(0, -5))
+def flower(): return Entity('flower', True, as_food=Edible(0, -1)) 
+def mushroom(): return Entity('mushroom', True, as_food=Edible(10, 1))

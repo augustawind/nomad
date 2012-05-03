@@ -1,4 +1,5 @@
 from nomad.entity.base import Entity
+from nomad.entity.role import *
 from nomad.entity.etypes import FAUNA
 from .actions import *
 
@@ -56,4 +57,4 @@ class Fauna(Entity):
 
 
 def yak():
-    return Fauna('yak', False, shuffle())
+    return Entity('yak', False, as_actor=Actor(shuffle()))
