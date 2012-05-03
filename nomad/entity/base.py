@@ -9,11 +9,19 @@ defaultFood = FoodData(15, 0)
 class Entity:
     '''A thing that exists in the plains.'''
 
-    def __init__(self, name, walkable, etype='entity', as_food=None):
+    def __init__(self, name, walkable, etype='entity', as_food=None,
+                 as_tool=None, as_actor=None, as_reactor=None, as_mortal=None,
+                 as_tactile=None):
         self.name = name
         self.walkable = walkable
         self.etype = etype
-        self.as_food = as_food
+
+        for attr in ('as_food', 'as_tool', 'as_actor', 'as_reactor',
+                     'as_mortal', 'as_tactile'):
+            role = eval(attr)
+            setattr(self, attr, role)
+            if role:
+                role.assign(self)
 
         self.x = None
         self.y = None

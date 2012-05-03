@@ -1,3 +1,5 @@
+from nomad.entity.tool import *
+
 MIN_SATIATION = 0
 MAX_SATIATION = 100
 MIN_HEALTH = 0
@@ -8,7 +10,10 @@ SATIATION_DECAY = 0.25
 
 class Role:
 
-    def __init__(self, entity):
+    def __init__(self):
+        self.entity = None
+
+    def assign(self, entity):
         self.entity = entity
 
     def __getattr__(self, *args, **kwargs):
@@ -20,15 +25,16 @@ class Role:
 
 class Edible(Role):
 
-    def __init__(self, entity, satiation, nutrition):
-        super().__init__(entity)
+    def __init__(self, satiation, nutrition):
+        super().__init__()
         self.satiation = satiation
         self.nutrition = nutrition
 
 
 class Tool(Role):
 
-    def __init__(self, entity, on_use):
+    def __init__(self, on_use):
+        super().__init__()
         self.on_use = on_use
 
     def use_on(self, entity):
@@ -37,8 +43,8 @@ class Tool(Role):
 
 class Active(Role):
 
-    def __init__(self, entity, action):
-        super().__init__(entity)
+    def __init__(self, action):
+        super().__init__()
         self.action = action
 
     def update(self, nomad):
@@ -47,8 +53,8 @@ class Active(Role):
 
 class Reactive(Role):
 
-    def __init__(self, entity, action):
-        super().__init__(entity)
+    def __init__(self, action):
+        super().__init__()
         self.action = action
 
     def react_to(self, entity):
@@ -57,8 +63,8 @@ class Reactive(Role):
 
 class Mortal(Role):
 
-    def __init__(self, entity, satiation=MAX_SATIATION, health=MAX_HEALTH):
-        super().__init__(entity)
+    def __init__(self, satiation=MAX_SATIATION, health=MAX_HEALTH):
+        super().__init__()
         self._satiation = satiation
         self._health = health
 
@@ -103,8 +109,8 @@ class Tactile(Role):
         frozenset(('sharp rock', 'stick')): spear
         }
 
-    def __init__(self, entity, left_held=None, right_held=None):
-        super().__init__(entity)
+    def __init__(self, left_held=None, right_held=None):
+        super().__init__()
         self.left_held = left_held
         self.right_held = right_held
 
@@ -126,11 +132,11 @@ class Tactile(Role):
         self.plains.add_entity(entity, self.x, self.y, z)
 
     def drop_left(self):
-        self._put_underfoot(self.left_held)
+        self.put_underfoot(self.left_held)
         self.left_held = None
 
     def drop_right(self):
-        self._put_underfoot(self.right_held)
+        self.put_underfoot(self.right_held)
         self.right_held = None
 
     def drop_all(self):
@@ -150,6 +156,6 @@ class Tactile(Role):
             self.right_held = None
             
         tool = self.tool_factory[parts]()
-        self._put_underfoot(tool)
+        self.put_underfoot(tool)
 
 
