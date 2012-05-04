@@ -1,6 +1,6 @@
+'''the dynamically generated world in which Nomad takes place'''
 from nomad.entity import Entity
 from nomad.util import *
-
 
 class Plains:
     '''A shifting world that generates itself as it moves.'''
@@ -64,18 +64,23 @@ class Plains:
         return (xy in self.entities and
                 all(e.walkable for e in self.entities[xy]))
 
-    def get_z(self, entity, x, y):
+    def get_z(self, entity):
+        '''Return the z coordinate of an entity on this plains.'''
+        x, y = entity.pos
         return self.entities[(x, y)].index(entity)
 
     def get_entity(self, x, y, z=-1):
+        '''Return the entity at the given coordinates on this plains.'''
         return self.entities[(x, y)][z]
 
     def get_entities(self):
+        '''Yield each entity on this plains in an arbitrary order.'''
         for ents in self.entities.values():
             for ent in ents:
                 yield ent
 
     def get_coords(self):
+        '''Yield an x, y, z triplet for each coordinate on this plains.'''
         for (x, y), ents in self.entities.items():
             for z in range(len(ents)):
                 yield x, y, z
@@ -118,7 +123,7 @@ class Plains:
 
     def shift(self, dx, dy):
         '''Shift the plains in the given x and y directions.'''
-        if not (dx or dy) or (dx and dy):
+        if not (dx or dy):
             return
 
         gen_coords = []
@@ -136,7 +141,8 @@ class Plains:
                 else:
                     del_coords.append(p1)
                     gen_coords.append(p2)
-        elif dx:
+
+        if dx:
             ys = set(y for x, y in self.entities)
             for y in ys:
                 x1 = min(x for x, y_ in self.entities if y_ == y)

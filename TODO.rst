@@ -1,6 +1,8 @@
 N   O    M    A   D    <>     T     O     D     O
 -------------------------------------------------
 
+Refactor and comment everything.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Implement hatchet-making.
 ^^^^^^^^^^^^^^^^^^^^^^^^^

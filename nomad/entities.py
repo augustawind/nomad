@@ -1,3 +1,4 @@
+'''entity definitions'''
 import random
 
 from nomad.entity import Entity

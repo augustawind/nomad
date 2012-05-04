@@ -1,3 +1,5 @@
+'''things that exist in the plains'''
+
 class Entity:
     '''A thing that exists in the plains.'''
 
@@ -20,28 +22,46 @@ class Entity:
         self.plains = None
 
     def __str__(self):
+        '''Return the entity's name.'''
         return self.name
 
+    def _get_pos(self):
+        return self.x, self.y
+    def _set_pos(self, pos):
+        self.x, self.y = pos
+    pos = property(_get_pos, _set_pos, doc=
+        '''Swizzle for (x, y).''')
+
     def update(self, nomad):
-        '''Move the entity a step forward in time. Does nothing, but
-        subclasses can override this method to provide behavior.
+        '''Update the entity for each of its roles, given a `Nomad`.
+        
+        A `Role` may provide behavior for this method by overriding
+        `Role.update`.
         '''
         for role in (getattr(self, a) for a in
-                     ('as_food', 'as_tool', 'as_actor', 'as_reactor',
-                      'as_mortal', 'as_tactile')):
+                     ('as_matter', 'as_food', 'as_tool', 'as_actor',
+                      'as_reactor', 'as_mortal', 'as_tactile')):
             if role:
                 role.update(nomad)
 
     def get_underfoot(self):
-        '''Return the z coordinate and the entity just below the nomad.'''
-        z = self.plains.get_z(self, self.x, self.y) - 1
+        '''Return the z coordinate and the entity just under this one.'''
+        z = self.plains.get_z(self) - 1
         return z, self.plains.get_entity(self.x, self.y, z)
+
+    def put_underfoot(self, entity):
+        '''Place an entity just under this one.'''
+        if not entity:
+            return
+        z = self.plains.get_z(self.entity)
+        self.plains.add_entity(entity, self.entity.x, self.entity.y, z)
     
     def wait(self):
+        '''Do nothing.'''
         pass
 
     def move(self, dx, dy):
-        '''Move the entity in the given direction on its plains.'''
+        '''Move the entity in the given direction.'''
         assert None not in (self.x, self.y, self.plains)
         x = self.x + dx
         y = self.y + dy

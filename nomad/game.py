@@ -1,15 +1,19 @@
+'''run the game'''
 import curses
-from curses import *
+from curses import KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN
 from functools import partial
 
 from nomad.entities import *
 from nomad.nomad import Nomad
-from nomad.plains import Plains, gen
+from nomad.plains import Plains
+import nomad.plainsgen as gen
 from nomad.util import *
 
+# Subwindow dimensions as (height, width, y, x)
 PLAINS_WIN = (20, 20, 0, 0)
 STATUS_WIN = (20, 20, 0, 21)
 
+# curses color pair numbers (for `init_color_pairs` and `render_info`)
 PAIR_RED = 1
 PAIR_GREEN = 2
 PAIR_YELLOW = 3
@@ -18,9 +22,11 @@ PAIR_MAGENTA = 5
 PAIR_CYAN = 6
 PAIR_WHITE = 7
 
+# Just an alias for readability (for `player_commands`)
 KEY = ord
 
 def run():
+    '''Initialize curses and call `main`.'''
     stdscr = curses.initscr()
     curses.start_color()
     curses.use_default_colors()
@@ -30,8 +36,10 @@ def run():
 
 
 def main(stdscr): 
+    '''Run the game, given a curses ``stdscr``.'''
     init_color_pairs()
 
+    # Define the world.
     nomad = Nomad(los=9)
     plains = Plains.with_floor(nomad.los, earth, gen.chance(
                                {90: grass, 10: flower,
@@ -39,21 +47,29 @@ def main(stdscr):
                                 2: sharp_rock, 1: yak}))
     plains.add_entity(nomad, 0, 0)
 
+    # Initialize the user interface.
     plains_win = curses.newwin(*PLAINS_WIN) 
     status_win = curses.newwin(*STATUS_WIN)
 
+    # Get rendering data.
     display_dict = render_info()
+    # Get keybindings.
     command_dict = player_commands()
+    # Execute the main loop while the nomad lives.
     while nomad.as_mortal.alive:
-        update_plains_window(plains_win, display_dict, nomad, plains)
+        # Update the screen.
+        update_plains_window(plains_win, display_dict, plains)
         update_status_window(status_win, nomad)
 
+        # Handle user input.
         key = stdscr.getch()
         if key in command_dict:
             command_dict[key](nomad)
 
+        # Update all entities.
         update_entities(nomad, plains)
 
+    # Game over.
     stdscr.clear()
     stdscr.addstr(0, 0, "Game over.")
     stdscr.addstr(1, 0, "The nomad's journey has ended.") 
@@ -62,6 +78,7 @@ def main(stdscr):
 
 
 def update_status_window(win, nomad):
+    '''Draw some information about a `Nomad` on a window.'''
     win.clear()
     y = 1
     x = 2
@@ -89,16 +106,20 @@ def update_status_window(win, nomad):
     win.refresh()
 
 
-def update_plains_window(win, display_dict, nomad, plains):
+def update_plains_window(win, display_dict, plains):
+    '''Draw a `Plains` on a window, given rendering information.'''
     win.clear()
 
-    radius = nomad.los
+    radius = plains.radius
     coords = range(-radius, radius + 1)
+    # For y, x in the boundary rectangle of the plains
     for y in coords:
         for x in coords:
+            # If xy is in the plains, draw the plains at that xy.
             if (x, y) in plains.entities:
                 entity = plains.get_entity(x, y)
                 char, color = display_dict[entity.name]
+            # Otherwise, draw an blank space.
             else:
                 char = ' '
                 color = PAIR_WHITE
@@ -109,15 +130,32 @@ def update_plains_window(win, display_dict, nomad, plains):
 
 
 def update_entities(nomad, plains):
+    '''Update each `Entity` in the `Plains` with the `Nomad`.'''
     for entity in plains.get_entities():
         entity.update(nomad)
 
 
-def move_nomad(dx, dy, nomad):
-    nomad.move(dx, dy)
-
-
 def player_commands():
+    '''Return a dict mapping curses key values to functions that
+    should be called when those keys are pressed.
+
+    Each function should take a `Nomad` as its single argument.
+    '''
+
+    def make_move_nomad(dx, dy):
+        def move_nomad(nomad):
+            nomad.move(dx, dy)
+        return move_nomad
+
+    move_up = make_move_nomad(*DIR_UP)
+    move_down = make_move_nomad(*DIR_DOWN)
+    move_left = make_move_nomad(*DIR_LEFT)
+    move_right = make_move_nomad(*DIR_RIGHT)
+    move_upleft = make_move_nomad(*DIR_UPLEFT)
+    move_upright = make_move_nomad(*DIR_UPRIGHT)
+    move_downleft = make_move_nomad(*DIR_DOWNLEFT)
+    move_downright = make_move_nomad(*DIR_DOWNRIGHT)
+
     def eat_underfoot(nomad):
         nomad.as_mortal.eat_underfoot()
 
@@ -130,25 +168,33 @@ def player_commands():
     def make_tool(nomad):
         nomad.as_tactile.make_tool()
 
-    return {
-        #KEY('h'):  partial(move_nomad, *DIR_LEFT),
-        #KEY('l'):  partial(move_nomad, *DIR_RIGHT),
-        #KEY('k'):  partial(move_nomad, *DIR_UP),
-        #KEY('j'):  partial(move_nomad, *DIR_DOWN),
-        KEY_LEFT:   partial(move_nomad, *DIR_LEFT),
-        KEY_RIGHT:  partial(move_nomad, *DIR_RIGHT),
-        KEY_UP:     partial(move_nomad, *DIR_UP),
-        KEY_DOWN:   partial(move_nomad, *DIR_DOWN),
-        KEY('w'):   Nomad.wait,
+    def multikey_dict(d):
+        return dict((key, v) for keys, v in d.items() for key in keys)
 
-        KEY('e'):   eat_underfoot,
-        KEY('g'):   pickup_underfoot,
-        KEY('d'):   drop_all,
-        KEY('m'):   make_tool,
-        }
+    return multikey_dict({
+        (KEY('k'), KEY_UP):    move_up,
+        (KEY('j'), KEY_DOWN):  move_down,
+        (KEY('h'), KEY_LEFT):  move_left,
+        (KEY('l'), KEY_RIGHT): move_right,
+        (KEY('y'),):           move_upleft,
+        (KEY('u'),):           move_upright,
+        (KEY('b'),):           move_downleft,
+        (KEY('n'),):           move_downright,
+
+        (KEY('w'),): Nomad.wait,
+        (KEY('e'),): eat_underfoot,
+        (KEY('g'),): pickup_underfoot,
+        (KEY('d'),): drop_all,
+        (KEY('m'),): make_tool,
+        })
 
 
 def render_info():
+    '''Return a dict mapping entity names to rendering data.
+
+    Each value is of the form (char, pair_num) where char is the
+    character to render and pair_num is a curses color pair number 0-9.
+    '''
     return {
         'nomad':        ('@', PAIR_YELLOW),
         'grass':        ('"', PAIR_GREEN),
@@ -164,6 +210,7 @@ def render_info():
 
 
 def init_color_pairs():
+    '''Initialize curses color pairs.'''
     for (n, fg_color) in (
             (PAIR_RED,      curses.COLOR_RED),
             (PAIR_GREEN,    curses.COLOR_GREEN),

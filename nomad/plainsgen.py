@@ -1,3 +1,4 @@
+'''algorithms for dynamic generation of the plains'''
 import random as rand
 
 from nomad.util import *

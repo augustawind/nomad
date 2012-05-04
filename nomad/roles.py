@@ -107,7 +107,7 @@ class Mortal(Role):
         '''Attempt to eat the entity underfoot.'''
         z, entity = self.get_underfoot()
         if self.eat(entity):
-            self.plains.pop_entity(self.x, self.y, z)
+            self.plains.pop_entity(self.entity.x, self.entity.y, z)
 
 
 class Tactile(Role):
@@ -127,13 +127,7 @@ class Tactile(Role):
             self.right_held = entity
         else:
             return
-        self.plains.pop_entity(self.x, self.y, z)
-
-    def put_underfoot(self, entity):
-        if not entity:
-            return
-        z = self.plains.get_z(self.entity, self.entity.x, self.entity.y)
-        self.plains.add_entity(entity, self.x, self.y, z)
+        self.plains.pop_entity(self.entity.x, self.entity.y, z)
 
     def drop_left(self):
         self.put_underfoot(self.left_held)
