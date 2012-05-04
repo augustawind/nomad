@@ -1,1 +1,1 @@
-__all__ = ['entity', 'game', 'nomad', 'plains', 'util']
+__all__ = ['entity', 'entities', 'game', 'nomad', 'plains', 'roles', 'util']

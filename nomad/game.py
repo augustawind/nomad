@@ -1,7 +1,8 @@
 import curses
+from curses import *
 from functools import partial
 
-from nomad.entity import fauna, flora, terrain, tool
+from nomad.entities import *
 from nomad.nomad import Nomad
 from nomad.plains import Plains, gen
 from nomad.util import *
@@ -32,10 +33,10 @@ def main(stdscr):
     init_color_pairs()
 
     nomad = Nomad(los=9)
-    plains = Plains.with_floor(nomad.los, terrain.earth, gen.chance(
-                               {90: flora.grass, 10: flora.flower,
-                                3: flora.mushroom, 5: tool.stick,
-                                2: tool.sharp_rock, 1: fauna.yak}))
+    plains = Plains.with_floor(nomad.los, earth, gen.chance(
+                               {90: grass, 10: flower,
+                                3: mushroom, 5: stick,
+                                2: sharp_rock, 1: yak}))
     plains.add_entity(nomad, 0, 0)
 
     plains_win = curses.newwin(*PLAINS_WIN) 
@@ -43,7 +44,7 @@ def main(stdscr):
 
     display_dict = render_info()
     command_dict = player_commands()
-    while nomad.alive:
+    while nomad.as_mortal.alive:
         update_plains_window(plains_win, display_dict, nomad, plains)
         update_status_window(status_win, nomad)
 
@@ -71,18 +72,18 @@ def update_status_window(win, nomad):
 
     y += ystep
     win.addstr(y, x, 'Health: ')
-    win.addstr('{:.0f}'.format(nomad.health))
+    win.addstr('{:.0f}'.format(nomad.as_mortal.health))
     y += ystep
     win.addstr(y, x, 'Satiation: ')
-    win.addstr('{:.0f}'.format(nomad.satiation))
+    win.addstr('{:.0f}'.format(nomad.as_mortal.satiation))
     y += ystep
 
     y += ystep
     win.addstr(y, x, 'LH: ')
-    win.addstr(str(nomad.left_held))
+    win.addstr(str(nomad.as_tactile.left_held))
     y+= ystep
     win.addstr(y, x, 'RH: ')
-    win.addstr(str(nomad.right_held))
+    win.addstr(str(nomad.as_tactile.right_held))
 
     win.box()
     win.refresh()
@@ -117,42 +118,58 @@ def move_nomad(dx, dy, nomad):
 
 
 def player_commands():
-    return {
-        KEY('h'): partial(move_nomad, *DIR_LEFT),
-        KEY('l'): partial(move_nomad, *DIR_RIGHT),
-        KEY('k'): partial(move_nomad, *DIR_UP),
-        KEY('j'): partial(move_nomad, *DIR_DOWN),
-        KEY('w'): Nomad.wait,
+    def eat_underfoot(nomad):
+        nomad.as_mortal.eat_underfoot()
 
-        KEY('e'): Nomad.eat_underfoot,
-        KEY('g'): Nomad.pickup_underfoot,
-        KEY('d'): Nomad.drop_all,
-        KEY('m'): Nomad.make_tool,
+    def pickup_underfoot(nomad):
+        nomad.as_tactile.pickup_underfoot()
+
+    def drop_all(nomad):
+        nomad.as_tactile.drop_all()
+
+    def make_tool(nomad):
+        nomad.as_tactile.make_tool()
+
+    return {
+        #KEY('h'):  partial(move_nomad, *DIR_LEFT),
+        #KEY('l'):  partial(move_nomad, *DIR_RIGHT),
+        #KEY('k'):  partial(move_nomad, *DIR_UP),
+        #KEY('j'):  partial(move_nomad, *DIR_DOWN),
+        KEY_LEFT:   partial(move_nomad, *DIR_LEFT),
+        KEY_RIGHT:  partial(move_nomad, *DIR_RIGHT),
+        KEY_UP:     partial(move_nomad, *DIR_UP),
+        KEY_DOWN:   partial(move_nomad, *DIR_DOWN),
+        KEY('w'):   Nomad.wait,
+
+        KEY('e'):   eat_underfoot,
+        KEY('g'):   pickup_underfoot,
+        KEY('d'):   drop_all,
+        KEY('m'):   make_tool,
         }
 
 
 def render_info():
     return {
-        'nomad': ('@', PAIR_YELLOW),
-        'grass': ('"', PAIR_GREEN),
-        'flower': ('*', PAIR_BLUE),
-        'earth': ('.', PAIR_WHITE),
-        'rock': ('0', PAIR_CYAN),
-        'yak': ('Y', PAIR_RED),
-        'mushroom' : ('?', PAIR_MAGENTA),
-        'sharp rock': ('>', PAIR_CYAN),
-        'stick': ('/', PAIR_WHITE),
-        'spear': ('|', PAIR_YELLOW),
+        'nomad':        ('@', PAIR_YELLOW),
+        'grass':        ('"', PAIR_GREEN),
+        'flower':       ('*', PAIR_BLUE),
+        'earth':        ('.', PAIR_WHITE),
+        'rock':         ('0', PAIR_CYAN),
+        'yak':          ('Y', PAIR_RED),
+        'mushroom':     ('?', PAIR_MAGENTA),
+        'sharp rock':   ('>', PAIR_CYAN),
+        'stick':        ('/', PAIR_WHITE),
+        'spear':        ('|', PAIR_YELLOW),
         }
 
 
 def init_color_pairs():
     for (n, fg_color) in (
-            (PAIR_RED, curses.COLOR_RED),
-            (PAIR_GREEN, curses.COLOR_GREEN),
-            (PAIR_YELLOW, curses.COLOR_YELLOW),
-            (PAIR_BLUE, curses.COLOR_BLUE),
-            (PAIR_MAGENTA, curses.COLOR_MAGENTA),
-            (PAIR_CYAN, curses.COLOR_CYAN),
-            (PAIR_WHITE, curses.COLOR_WHITE)):
+            (PAIR_RED,      curses.COLOR_RED),
+            (PAIR_GREEN,    curses.COLOR_GREEN),
+            (PAIR_YELLOW,   curses.COLOR_YELLOW),
+            (PAIR_BLUE,     curses.COLOR_BLUE),
+            (PAIR_MAGENTA,  curses.COLOR_MAGENTA),
+            (PAIR_CYAN,     curses.COLOR_CYAN),
+            (PAIR_WHITE,    curses.COLOR_WHITE)):
         curses.init_pair(n, fg_color, -1)

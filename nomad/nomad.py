@@ -1,10 +1,18 @@
-from nomad.entity.bipedal import Bipedal
-from nomad.entity.fauna.actions import idle
+from nomad.entity import Entity
+from nomad.roles import *
+from nomad.entities import *
 
-class Nomad(Bipedal):
+
+class Nomad(Entity):
+
+    tool_factory = {
+        frozenset(('sharp rock', 'stick')): spear
+        }
 
     def __init__(self, los=5):
-        super().__init__('nomad', False, idle())
+        super().__init__('nomad', False,
+                         as_mortal=Mortal(),
+                         as_tactile=Tactile(self.tool_factory))
         self.los = los
 
     def move(self, dx, dy):

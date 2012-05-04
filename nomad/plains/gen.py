@@ -7,6 +7,7 @@ def background():
         return dict((xy, [plains.floor_entity()]) for xy in edge_coords)
     return generate
 
+
 def random(*entities):
     def generate(plains, edge_coords):
         new_ents = {}
@@ -14,6 +15,7 @@ def random(*entities):
             new_ents[xy] = [plains.floor_entity(), rand.choice(entities)()]
         return new_ents
     return generate
+
 
 def chance(prob2ent):
     probs = sorted(prob2ent.keys(), key=lambda x: x + rand.random())

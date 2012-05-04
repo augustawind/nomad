@@ -2,14 +2,6 @@ N   O    M    A   D    <>     T     O     D     O
 -------------------------------------------------
 
 
-Implement Roles.
-^^^^^^^^^^^^^^^^
-
-    #) Remove Entity subclasses, replacing their functionality with
-       roles.
-
-
-
 Implement hatchet-making.
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 

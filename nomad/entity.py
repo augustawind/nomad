@@ -1,23 +1,15 @@
-from collections import namedtuple
-
-from nomad.entity.etypes import *
-
-FoodData = namedtuple('FoodData', 'satiation nutrition')
-
-defaultFood = FoodData(15, 0)
-
 class Entity:
     '''A thing that exists in the plains.'''
 
-    def __init__(self, name, walkable, etype='entity', as_food=None,
-                 as_tool=None, as_actor=None, as_reactor=None, as_mortal=None,
+    def __init__(self, name, walkable, as_matter=None, as_food=None,
+                 as_tool=None,
+                 as_actor=None, as_reactor=None, as_mortal=None,
                  as_tactile=None):
         self.name = name
         self.walkable = walkable
-        self.etype = etype
 
-        for attr in ('as_food', 'as_tool', 'as_actor', 'as_reactor',
-                     'as_mortal', 'as_tactile'):
+        for attr in ('as_matter', 'as_food', 'as_tool', 'as_actor',
+                     'as_reactor', 'as_mortal', 'as_tactile'):
             role = eval(attr)
             setattr(self, attr, role)
             if role:

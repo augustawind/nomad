@@ -1,4 +1,4 @@
-from nomad.entity.tool import *
+from functools import wraps
 
 MIN_SATIATION = 0
 MAX_SATIATION = 100
@@ -23,6 +23,13 @@ class Role:
         pass
 
 
+class Matter(Role):
+
+    def __init__(self, weight, edge):
+        self.weight = weight
+        self.edge = edge
+
+
 class Edible(Role):
 
     def __init__(self, satiation, nutrition):
@@ -38,7 +45,7 @@ class Tool(Role):
         self.on_use = on_use
 
     def use_on(self, entity):
-        self.on_use(self.entity, entity)
+        self.on_use(self, entity)
 
 
 class Actor(Role):
@@ -105,12 +112,9 @@ class Mortal(Role):
 
 class Tactile(Role):
 
-    tool_factory = {
-        frozenset(('sharp rock', 'stick')): spear
-        }
-
-    def __init__(self, left_held=None, right_held=None):
+    def __init__(self, tool_factory, left_held=None, right_held=None):
         super().__init__()
+        self.tool_factory = tool_factory
         self.left_held = left_held
         self.right_held = right_held
 
@@ -125,10 +129,10 @@ class Tactile(Role):
             return
         self.plains.pop_entity(self.x, self.y, z)
 
-    def _put_underfoot(self, entity):
+    def put_underfoot(self, entity):
         if not entity:
             return
-        z = self.plains.get_z(self, self.x, self.y)
+        z = self.plains.get_z(self.entity, self.entity.x, self.entity.y)
         self.plains.add_entity(entity, self.x, self.y, z)
 
     def drop_left(self):

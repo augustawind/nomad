@@ -1,5 +1,0 @@
-TERRAIN = 1
-FAUNA = 2
-FLORA = 3
-BIPEDAL = 4
-TOOL = 5

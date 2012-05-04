@@ -1,4 +1,4 @@
-from nomad.entity.base import Entity
+from nomad.entity import Entity
 from nomad.util import *
 
 

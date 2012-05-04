@@ -5,6 +5,7 @@ DIR_LEFT = (-1, 0)
 DIR_RIGHT = (1, 0)
 DIR_UP = (0, -1)
 DIR_DOWN = (0, 1)
+DIRECTIONS = (DIR_LEFT, DIR_RIGHT, DIR_UP, DIR_DOWN)
 
 Point = namedtuple('Point', 'x y')
 
