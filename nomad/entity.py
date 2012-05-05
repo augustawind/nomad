@@ -53,8 +53,8 @@ class Entity:
         '''Place an entity just under this one.'''
         if not entity:
             return
-        z = self.plains.get_z(self.entity)
-        self.plains.add_entity(entity, self.entity.x, self.entity.y, z)
+        z = self.plains.get_z(self)
+        self.plains.add_entity(entity, self.x, self.y, z)
     
     def wait(self):
         '''Do nothing.'''
