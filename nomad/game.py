@@ -22,9 +22,6 @@ PAIR_MAGENTA = 5
 PAIR_CYAN = 6
 PAIR_WHITE = 7
 
-# Just an alias for readability (for `player_commands`)
-KEY = ord
-
 def run():
     '''Initialize curses and call `main`.'''
     stdscr = curses.initscr()
@@ -70,11 +67,7 @@ def main(stdscr):
         update_entities(nomad, plains)
 
     # Game over.
-    stdscr.clear()
-    stdscr.addstr(0, 0, "Game over.")
-    stdscr.addstr(1, 0, "The nomad's journey has ended.") 
-    stdscr.getch()
-    curses.endwin()
+    game_over(stdscr, nomad)
 
 
 def update_status_window(win, nomad):
@@ -135,6 +128,15 @@ def update_entities(nomad, plains):
         entity.update(nomad)
 
 
+def game_over(stdscr, nomad):
+    '''End the game.'''
+    stdscr.clear()
+    stdscr.addstr(0, 0, "Game over.")
+    stdscr.addstr(1, 0, "The nomad's journey has ended.") 
+    stdscr.getch()
+    curses.endwin()
+
+
 def player_commands():
     '''Return a dict mapping curses key values to functions that
     should be called when those keys are pressed.
@@ -170,6 +172,8 @@ def player_commands():
 
     def multikey_dict(d):
         return dict((key, v) for keys, v in d.items() for key in keys)
+
+    KEY = ord
 
     return multikey_dict({
         (KEY('k'), KEY_UP):    move_up,
