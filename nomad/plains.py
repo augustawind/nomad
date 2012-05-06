@@ -123,11 +123,11 @@ class Plains:
 
     def shift(self, dx, dy):
         '''Shift the plains in the given x and y directions.'''
-        if not (dx or dy):
-            return
+        assert dx or dy
 
         gen_coords = []
         del_coords = []
+
         if dy:
             xs = set(x for x, y in self.entities)
             for x in xs:
@@ -162,6 +162,50 @@ class Plains:
             if p in del_coords:
                 continue
             new_entities[(x - dx , y - dy)] = self.entities[p]
+
+        edge_entities = self.generate(self, gen_coords)
+        self._init_entities(edge_entities)
+        self._inform_entities(new_entities)
+        new_entities.update(edge_entities)
+        self.entities = new_entities
+
+    def shift(self, dx, dy):
+        '''Shift the plains in the given x and y directions.'''
+        assert dx or dy
+
+        gen_coords = []
+        del_coords = []
+
+        def update_coords(d, p1, p2):
+            if d < 0:
+                gen_coords.append(p1)
+                del_coords.append(p2)
+            else:
+                del_coords.append(p1)
+                gen_coords.append(p2)
+
+        for x, y in self.entities:
+            xs = []
+            ys = []
+            for x_, y_ in self.entities:
+                if y_ == y: xs.append(x_)
+                if x_ == x: ys.append(y_)
+
+            if dy:
+                p1 = (x, min(ys))
+                p2 = (x, max(ys))
+                update_coords(dy, p1, p2)
+            if dx:
+                p1 = (min(xs), y)
+                p2 = (max(xs), y)
+                update_coords(dx, p1, p2)
+
+        new_entities = {}
+        for x, y in self.entities:
+            p = (x, y)
+            if p in del_coords:
+                continue
+            new_entities[(x - dx, y - dy)] = self.entities[p]
 
         edge_entities = self.generate(self, gen_coords)
         self._init_entities(edge_entities)

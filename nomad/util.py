@@ -14,6 +14,14 @@ DIRECTIONS = (DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT,
 
 Point = namedtuple('Point', 'x y')
 
+def edge_coord(origin, radius, trig_func, degrees):
+    return origin + radius * trig_func(degrees * math.pi / 180) 
+
+def edge_point(origin_x, origin_y, radius, degrees):
+    return (edge_coord(origin_x, radius, math.cos, degrees),
+            edge_coord(origin_y, radius, math.sin, degrees))
+
+
 def points_in_circle(radius):
     for y in range(-radius, radius):
         for x in range(-radius, radius):
