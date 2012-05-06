@@ -6,8 +6,6 @@ Tidy up.
 
     #) Rewrite Plains.shift method.
 
-    #) Comment roles.py.
-
 
 Implement reach.
 ^^^^^^^^^^^^^^^^
