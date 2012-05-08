@@ -29,5 +29,18 @@ def points_in_circle(radius):
                 yield Point(x, y)
 
 
+def points_in_octagon(side):
+    points = set()
+    size = side * 3
+    half_size = size // 2
+    half_side = side // 2
+    for y in range(-half_size, half_size):
+        x1 = -half_side - (half_size - abs(y)) + 1
+        x2 = half_side + (half_size - abs(y))
+        for x in range(x1, x2):
+            points.add((x, y))
+    return points
+
+
 def distance(x, y, x2, y2):
     return math.sqrt(((x2 - x) ** 2) + ((y2 - y) ** 2))

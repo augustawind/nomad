@@ -16,7 +16,7 @@ class Plains:
     @classmethod
     def with_floor(cls, radius, floor_entity, generate=None):
         entities = {}
-        for point in points_in_circle(radius):
+        for point in points_in_octagon(radius):
             entities[point] = [floor_entity()]
         
         return cls(radius, entities, floor_entity, generate=generate)

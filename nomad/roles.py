@@ -108,15 +108,15 @@ class Mortal(Role):
         return self._satiation
     def _set_satiation(self, x):
         self._satiation = max(MIN_SATIATION, min(MAX_SATIATION, x))
-    satiation = property(_get_satiation, _set_satiation
-        '''How full is the mortal? If this reaches 0, death occurs.''')
+    satiation = property(_get_satiation, _set_satiation, doc=
+        'How full is the mortal? If this reaches 0, death occurs.')
 
     def _get_health(self):
         return self._health
     def _set_health(self, x):
         self._health = max(MIN_HEALTH, min(MAX_HEALTH, x))
-    health = property(_get_health, _set_health
-        '''How healthy is the mortal? If this reaches 0, death occurs.''')
+    health = property(_get_health, _set_health, doc=
+        'How healthy is the mortal? If this reaches 0, death occurs.')
 
     def eat(self, entity):
         '''Attempt to eat an entity. Return True if successful, else False.'''

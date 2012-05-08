@@ -37,7 +37,7 @@ def main(stdscr):
     init_color_pairs()
 
     # Define the world.
-    nomad = Nomad(los=9)
+    nomad = Nomad(los=5)
     plains = Plains.with_floor(nomad.los, earth, gen.chance(
                                {90: grass, 10: flower,
                                 3: mushroom, 5: stick,
