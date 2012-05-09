@@ -37,11 +37,19 @@ def main(stdscr):
     init_color_pairs()
 
     # Define the world.
-    nomad = Nomad(los=5)
-    plains = Plains.with_floor(nomad.los, earth, gen.chance(
-                               {90: grass, 10: flower,
-                                3: mushroom, 5: stick,
-                                2: sharp_rock, 1: yak}))
+    nomad = Nomad(los=6)
+    los = nomad.los
+    half_los = los // 2 + 1
+    plains = Plains.with_floor(earth(),
+                               gen.chance(
+                                   {90: grass, 10: flower,
+                                    3: mushroom, 5: stick,
+                                    2: sharp_rock, 1: yak}),
+                               up=-los, left=-los, right=los, down=los,
+                               ul=Point(-half_los, -half_los),
+                               ur=Point(-half_los, half_los),
+                               lr=Point(half_los, half_los),
+                               ll=Point(half_los, -half_los),)
     plains.add_entity(nomad, 0, 0)
 
     # Initialize the user interface.
@@ -103,8 +111,7 @@ def update_plains_window(win, display_dict, plains):
     '''Draw a `Plains` on a window, given rendering information.'''
     win.clear()
 
-    radius = plains.radius
-    coords = range(-radius, radius + 1)
+    coords = range(plains.entities.left, plains.entities.right + 1)
     # For y, x in the boundary rectangle of the plains
     for y in coords:
         for x in coords:
@@ -116,8 +123,8 @@ def update_plains_window(win, display_dict, plains):
             else:
                 char = ' '
                 color = PAIR_WHITE
-            win.addnstr(y + radius, x + radius, char, 1,
-                        curses.color_pair(color))
+            win.addnstr(y + plains.entities.down, x + plains.entities.right,
+                        char, 1, curses.color_pair(color))
 
     win.refresh()
 

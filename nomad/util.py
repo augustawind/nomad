@@ -34,9 +34,9 @@ def points_in_octagon(side):
     size = side * 3
     half_size = size // 2
     half_side = side // 2
-    for y in range(-half_size, half_size):
-        x1 = -half_side - (half_size - abs(y)) + 1
-        x2 = half_side + (half_size - abs(y))
+    for y in range(-half_size - 1, half_size + 1):
+        x1 = -half_side - (side - abs(y))
+        x2 = half_side + (side - abs(y)) + 1
         for x in range(x1, x2):
             points.add((x, y))
     return points

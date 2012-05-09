@@ -2,11 +2,62 @@
 from nomad.entity import Entity
 from nomad.util import *
 
+class Octagon(dict):
+    '''A mapping of (x, y) tuples to arbitrary values. The coordinates
+    form an octagon.
+
+    `Properties`
+        `up` : int
+            Lower y boundary.
+        `down` : int
+            Upper y boundary.
+        `left` : int
+            Lower x boundary.
+        `right` : int
+            Upper x boundary.
+        `ul` : `Point`
+            Upper Left diagonal boundary.
+        `ur` : `Point`
+            Upper Right diagonal boundary.
+        `lr` : `Point`
+            Lower Right diagonal boundary.
+        `ll` : `Point`
+            Lower Left diagonal boundary.
+    '''
+
+    def __init__(self, up, right, down, left, ul, ur, lr, ll, default=None):
+        self.up = up
+        self.right = right
+        self.down = down
+        self.left = left
+        self.ul = ul
+        self.ur = ur 
+        self.lr = lr
+        self.ll = ll
+
+        for y in range(self.up, self.down + 1):
+            for x in range(self.left, self.right + 1):
+                if self.in_bounds(x, y):
+                    self[(x, y)] = default
+
+    def in_bounds(self, x, y):
+        if x < self.left:  return False
+        if x > self.right + 1: return False
+        if y < self.up:    return False
+        if y > self.down + 1:  return False
+
+        if x - self.ul.x < self.ul.y - y: return False
+        if x - self.ur.x < y - self.ur.y: return False
+        if x - self.ll.x > y - self.ll.y: return False
+        if x - self.lr.x > self.lr.y - y: return False
+
+        return True
+
+
 class Plains:
     '''A shifting world that generates itself as it moves.'''
 
-    def __init__(self, radius, entities, floor_entity, generate=None):
-        self.radius = radius
+    def __init__(self, entities, floor_entity, generate):
         self.entities = entities
         self.floor_entity = floor_entity
         self.generate = generate
@@ -14,12 +65,10 @@ class Plains:
         self._init_entities(self.entities)
 
     @classmethod
-    def with_floor(cls, radius, floor_entity, generate=None):
-        entities = {}
-        for point in points_in_octagon(radius):
-            entities[point] = [floor_entity()]
-        
-        return cls(radius, entities, floor_entity, generate=generate)
+    def with_floor(cls, floor_entity, generate, *shape_args, **shape_kws):
+        shape_kws['default'] = [floor_entity] 
+        return cls(Octagon(*shape_args, **shape_kws),
+                   floor_entity, generate)
 
     @staticmethod
     def _iter_entities(entities):
@@ -47,10 +96,6 @@ class Plains:
     def _init_entities(self, entities):
         for (x, y, z), e in self._iter_entities(entities):
             self._init_entity(e, x, y)
-    
-    def in_bounds(self, x, y):
-        '''Are the given x and y within the plains's borders?'''
-        return distance(0, 0, x, y) <= self.radius
 
     def z_in_bounds(self, x, y, z):
         '''Does an entity exist at (x, y, z), given that at least one
@@ -96,7 +141,7 @@ class Plains:
                 entities.insert(z, entity)
             else:
                 entities.append(entity)
-        elif self.in_bounds(x, y):
+        elif self.entities.in_bounds(x, y):
             self.entities[xy] = [entity]
 
         self._init_entity(entity, x, y)
@@ -176,13 +221,13 @@ class Plains:
         gen_coords = []
         del_coords = []
 
-        def update_coords(d, p1, p2):
+        def update_coords(d, to_gen, to_del):
             if d < 0:
-                gen_coords.append(p1)
-                del_coords.append(p2)
+                gen_coords.append(to_gen)
+                del_coords.append(to_del)
             else:
-                del_coords.append(p1)
-                gen_coords.append(p2)
+                del_coords.append(to_gen)
+                gen_coords.append(to_del)
 
         for x, y in self.entities:
             xs = []
@@ -191,14 +236,19 @@ class Plains:
                 if y_ == y: xs.append(x_)
                 if x_ == x: ys.append(y_)
 
-            if dy:
-                p1 = (x, min(ys))
-                p2 = (x, max(ys))
-                update_coords(dy, p1, p2)
-            if dx:
-                p1 = (min(xs), y)
-                p2 = (max(xs), y)
-                update_coords(dx, p1, p2)
+            dy_gen = (x, min(ys))
+            dy_del = (x, max(ys))
+            dx_gen = (min(xs), y)
+            dx_del = (max(xs), y)
+            if dy and not dx:
+                update_coords(dy, dy_gen, dy_del)
+            elif dx and not dy:
+                update_coords(dx, dx_gen, dy_del)
+            elif dx and dy:
+                to_gen = (dy_gen + dx_gen) // 2
+                to_del = (dy_del + dx_del) // 2
+                update_coords = (dx * dy, to_gen, to_del)
+
 
         new_entities = {}
         for x, y in self.entities:
