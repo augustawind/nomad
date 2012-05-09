@@ -177,12 +177,12 @@ def player_commands():
     def make_tool(nomad):
         nomad.as_tactile.make_tool()
 
-    def multikey_dict(d):
+    def flatten_keys(d):
         return dict((key, v) for keys, v in d.items() for key in keys)
 
     KEY = ord
 
-    return multikey_dict({
+    return flatten_keys({
         (KEY('k'), KEY_UP):    move_up,
         (KEY('j'), KEY_DOWN):  move_down,
         (KEY('h'), KEY_LEFT):  move_left,

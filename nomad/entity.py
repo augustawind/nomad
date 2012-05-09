@@ -1,17 +1,26 @@
 '''things that exist in the plains'''
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 
 from nomad.util import DIRECTIONS
+
+class Stats:
+
+    def __init__(self, strength, agility, intelligence):
+        self.strength = strength
+        self.agility = agility
+        self.intelligence = intelligence
+
 
 class Entity:
     '''A thing that exists in the plains.'''
 
-    def __init__(self, name, walkable, as_matter=None, as_food=None,
-                 as_tool=None,
-                 as_actor=None, as_reactor=None, as_mortal=None,
-                 as_tactile=None):
+    def __init__(self, name, walkable,
+                 stats=Stats(strength=1.0, agility=1.0, intelligence=1.0),
+                 as_matter=None, as_food=None, as_tool=None, as_actor=None,
+                 as_reactor=None, as_mortal=None, as_tactile=None):
         self.name = name
         self.walkable = walkable
+        self.stats = stats
 
         for attr in ('as_matter', 'as_food', 'as_tool', 'as_actor',
                      'as_reactor', 'as_mortal', 'as_tactile'):

@@ -1,14 +1,6 @@
 '''entity behaviors'''
 from functools import wraps
 
-MIN_SATIATION = 0
-MAX_SATIATION = 100
-MIN_HEALTH = 0
-MAX_HEALTH = 100
-
-SATIATION_DECAY = 0.25
-
-
 class Role:
     '''Abstract class for `Entity` behaviors.'''
 
@@ -90,6 +82,13 @@ class Reactor(Role):
 class Mortal(Role):
     '''Something that can die and requires sustainance to stay alive.'''
 
+    MIN_SATIATION = 0
+    MAX_SATIATION = 100
+    MIN_HEALTH = 0
+    MAX_HEALTH = 100
+
+    SATIATION_DECAY = 0.25
+
     def __init__(self, satiation=MAX_SATIATION, health=MAX_HEALTH):
         super().__init__()
         self._satiation = satiation
@@ -97,7 +96,7 @@ class Mortal(Role):
 
     def update(self, nomad):
         '''Reduce satiation by a fixed amount.'''
-        self.satiation -= SATIATION_DECAY
+        self.satiation -= self.SATIATION_DECAY
 
     @property
     def alive(self):
@@ -107,14 +106,14 @@ class Mortal(Role):
     def _get_satiation(self):
         return self._satiation
     def _set_satiation(self, x):
-        self._satiation = max(MIN_SATIATION, min(MAX_SATIATION, x))
+        self._satiation = max(self.MIN_SATIATION, min(self.MAX_SATIATION, x))
     satiation = property(_get_satiation, _set_satiation, doc=
         'How full is the mortal? If this reaches 0, death occurs.')
 
     def _get_health(self):
         return self._health
     def _set_health(self, x):
-        self._health = max(MIN_HEALTH, min(MAX_HEALTH, x))
+        self._health = max(self.MIN_HEALTH, min(self.MAX_HEALTH, x))
     health = property(_get_health, _set_health, doc=
         'How healthy is the mortal? If this reaches 0, death occurs.')
 
@@ -177,12 +176,13 @@ class Tactile(Role):
         if parts not in self.tool_factory:
             return
 
+        min_intelligence, tool = self.tool_factory[parts]
+        if self.stats.intelligence < min_intelligence:
+            return
+
         if str(self.left_held) in parts:
             self.left_held = None
         if str(self.right_held) in parts:
             self.right_held = None
             
-        tool = self.tool_factory[parts]()
-        self.put_underfoot(tool)
-
-
+        self.put_underfoot(tool())

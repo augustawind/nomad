@@ -1,4 +1,4 @@
-from nomad.entity import Entity
+from nomad.entity import Entity, Stats
 from nomad.roles import *
 from nomad.entities import *
 
@@ -7,10 +7,10 @@ class Nomad(Entity):
     '''The player-controlled entity.'''
 
     tool_factory = {
-        frozenset(('sharp rock', 'stick')): spear
+        frozenset(('sharp rock', 'stick')): (3, spear),
         }
 
-    def __init__(self, los=5):
+    def __init__(self, los, stats=Stats(3, 3, 3)):
         '''Initialize the nomad.
 
         :Parameters:
@@ -18,7 +18,7 @@ class Nomad(Entity):
                 How far the nomad sees in any direction. Should be
                 equal to the plains' radius, once set.
         '''
-        super().__init__('nomad', False,
+        super().__init__('nomad', False, stats,
                          as_mortal=Mortal(),
                          as_tactile=Tactile(self.tool_factory))
         self.los = los
