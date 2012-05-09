@@ -1,4 +1,5 @@
 '''entity behaviors'''
+from collections import OrderedDict
 
 class Role:
     '''Abstract class for `Entity` behaviors.'''
@@ -126,10 +127,10 @@ class Mortal(Role):
         return False
 
     def eat_nearest(self):
-        entities = self.get_accessable()
-        z, entity = entities.popitem(last=False)
-        if self.eat(entity):
-            self.plains.pop_entity(self.entity.x, self.entity.y, z)
+        entities = self.get_in_reach()
+        entity = entities[0]
+        if self.as_mortal.eat(entity):
+            self.plains.remove_entity(entity)
 
 
 class Tactile(Role):
@@ -138,29 +139,51 @@ class Tactile(Role):
     def __init__(self, object_factory, left_held=None, right_held=None):
         super().__init__()
         self.object_factory = object_factory
-        self.left_held = left_held
-        self.right_held = right_held
+        self.held_entities = [left_held, right_held]
+
+    def assign(self, entity):
+        super().assign(entity)
+
+    def _get_in_reach_and_held(self):
+        if any(self.held_entities):
+            return self.held_entities, True
+        return self.entity.get_in_reach(), False
+
+    def _remove_entity(self, held, entity):
+        if held:
+            if None not in self.held_entities:
+                self.held_entities[1] = None
+            elif self.held_entities[0]:
+                self.held_entities[0] = None
+        else:
+            self.plains.remove_entity(entity)
+
+    def eat_nearest(self):
+        entities, held = self._get_in_reach_and_held()
+        entity = entities[0]
+        if self.as_mortal.eat(entity):
+            self._remove_entity(held, entity)
 
     def pickup_nearest(self):
-        entities = self.get_accessable()
-        z, entity = entities.popitem(last=False)
-        if self.left_held is None:
-            self.left_held = entity
-        elif self.right_held is None:
-            self.right_held = entity
+        entities, held = self._get_in_reach_and_held()
+        entity = entities[0]
+        if self.held_entities[0] is None:
+            self.held_entities[0] = entity
+        elif self.held_entities[1] is None:
+            self.held_entities[1] = entity
         else:
             return
-        self.plains.pop_entity(self.entity.x, self.entity.y, z)
+        self._remove_entity(False, entity)
 
     def drop_left(self):
         '''Drop the entity in the tactile's left hand underfoot.'''
-        self.put_underfoot(self.left_held)
-        self.left_held = None
+        self.put_underfoot(self.held_entities[0])
+        self.held_entities[0] = None
 
     def drop_right(self):
         '''Drop the entity in the tactile's right hand underfoot.'''
-        self.put_underfoot(self.right_held)
-        self.right_held = None
+        self.put_underfoot(self.held_entities[1])
+        self.held_entities[1] = None
 
     def drop_all(self):
         '''Drop all entities held by the tactile.'''
@@ -170,7 +193,7 @@ class Tactile(Role):
     def combine_objects(self):
         '''Attempt to make a usable with the entities on hand.'''
         parts = frozenset(str(part) for part in
-                          (self.left_held, self.right_held))
+                          (self.held_entities[0], self.held_entities[1]))
 
         if parts not in self.object_factory:
             return
@@ -179,9 +202,9 @@ class Tactile(Role):
         if self.stats.intelligence < min_intelligence:
             return
 
-        if str(self.left_held) in parts:
-            self.left_held = None
-        if str(self.right_held) in parts:
-            self.right_held = None
+        if str(self.held_entities[0]) in parts:
+            self.held_entities[0] = None
+        if str(self.held_entities[1]) in parts:
+            self.held_entities[1] = None
             
         self.put_underfoot(usable())

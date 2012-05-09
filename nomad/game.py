@@ -98,10 +98,10 @@ def update_status_window(win, nomad):
 
     y += ystep
     win.addstr(y, x, 'LH: ')
-    win.addstr(str(nomad.as_tactile.left_held))
+    win.addstr(str(nomad.as_tactile.held_entities[0]))
     y+= ystep
     win.addstr(y, x, 'RH: ')
-    win.addstr(str(nomad.as_tactile.right_held))
+    win.addstr(str(nomad.as_tactile.held_entities[1]))
 
     win.box()
     win.refresh()
@@ -166,7 +166,7 @@ def player_commands():
     move_downright = make_move_nomad(*DIR_DOWNRIGHT)
 
     def eat_nearest(nomad):
-        nomad.as_mortal.eat_nearest()
+        nomad.as_tactile.eat_nearest()
 
     def pickup_nearest(nomad):
         nomad.as_tactile.pickup_nearest()

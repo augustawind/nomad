@@ -25,25 +25,25 @@ class Plains:
                 yield (x, y, z), e
 
     @staticmethod
-    def _inform_entity(entity, x, y):
+    def _inform_entity(entity, x, y, z):
         '''Inform an entity of its xy positon.'''
         entity.x = x
         entity.y = y 
+        entity.z = z
 
     @classmethod
     def _inform_entities(cls, entities):
         '''Inform many  entities of their xy positions.'''
-        for (x, y, z), e in cls._iter_entities(entities):
-            e.x = x
-            e.y = y
+        for point, entity in cls._iter_entities(entities):
+            cls._inform_entity(entity, *point)
 
-    def _init_entity(self, entity, x, y):
+    def _init_entity(self, entity, x, y, z):
         entity.plains = self
-        self._inform_entity(entity, x, y)
+        self._inform_entity(entity, x, y, z)
 
     def _init_entities(self, entities):
         for (x, y, z), e in self._iter_entities(entities):
-            self._init_entity(e, x, y)
+            self._init_entity(e, x, y, z)
 
     def z_in_bounds(self, x, y, z):
         '''Does an entity exist at (x, y, z), given that at least one
@@ -91,7 +91,7 @@ class Plains:
             entities.insert(z, entity)
         else:
             entities.append(entity)
-        self._init_entity(entity, x, y)
+        self._init_entity(entity, x, y, z)
 
     def pop_entity(self, x, y, z=-1):
         '''Remove and return the entity at the given x, y, z. If z is out of
@@ -107,6 +107,9 @@ class Plains:
             if not ents:
                 del self.entities[xy]
             return entity
+
+    def remove_entity(self, entity):
+        del self.entities[entity.pos][entity.z]
 
     def move_fromto(self, x1, y1, x2, y2, z1=-1, z2=-1):
         '''Remove the entity at (x1, y1, z1) and add it to (x2, y2, z2).'''
