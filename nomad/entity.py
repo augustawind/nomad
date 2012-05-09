@@ -86,9 +86,7 @@ class Entity:
         A `Role` may provide behavior for this method by overriding
         `Role.update`.
         '''
-        for role in (getattr(self, a) for a in
-                     ('as_matter', 'as_edible', 'as_usable', 'as_actor',
-                      'as_reactor', 'as_mortal', 'as_tactile')):
+        for role in self.roles.values():
             if role:
                 role.update(nomad)
 
@@ -97,6 +95,12 @@ class Entity:
         if not entity:
             return
         self.plains.add_entity(entity, self.x, self.y, self.z)
+
+    def damage(self, dmg):
+        damaged = False
+        for role in self.roles.values():
+            if role:
+                damaged = role.damage(dmg) or damaged
     
     def wait(self):
         '''Do nothing.'''

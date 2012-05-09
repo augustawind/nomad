@@ -11,16 +11,6 @@ Tidy up.
 Implement weapons.
 ^^^^^^^^^^^^^^^^^^
 
-    #) Write Tool subclass Weapon.
-       Instead of taking an 'on_use' func, it takes params like damage,
-       accuracy, etc. and defines it's own 'on_use'.
-
-    #) Write Entity.damage method.
-       Attempts to damage an entity, returning True if damage was dealt,
-       False otherwise.
-
-    #) Rename Tool to Usable, and Entity.as_tool to Entity.as_usable.
-
     #) Implement death for mortals and mulching for usable objects.
 
     #) Implement different mechanics for fleshy creatures and objects.

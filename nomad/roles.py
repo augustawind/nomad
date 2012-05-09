@@ -24,6 +24,13 @@ class Role:
         This method is called each turn of the game.
         '''
         pass
+    
+    def damage(self, dmg):
+        '''Cause damage to the entity assigned to this role.
+        
+        Return True if damage was dealt, else False.
+        '''
+        return False
 
 
 class Matter(Role):
@@ -53,6 +60,21 @@ class Usable(Role):
     def use_on(self, entity):
         '''Use the usable on another entity.'''
         self.on_use(self, entity)
+
+
+class Weapon(Role):
+    '''A tool for killing.'''
+
+    def __init__(self, damage, accuracy, nhits):
+        self.damage = damage
+        self.accuracy = accuracy
+        self.nhits = nhits
+
+    def use_on(self, entity):
+        for i in range(self.nhits):
+            if random() * 100 > self.accuracy:
+                continue
+            entity.damage(self.damage)
 
 
 class Actor(Role):
@@ -97,6 +119,12 @@ class Mortal(Role):
     def update(self, nomad):
         '''Reduce satiation by a fixed amount.'''
         self.satiation -= self.SATIATION_DECAY
+
+    def damage(self, dmg):
+        if not self.health:
+            return False
+        self.health -= dmg
+        return True
 
     @property
     def alive(self):
@@ -189,8 +217,7 @@ class Tactile(Role):
 
     def combine_objects(self):
         '''Attempt to make a usable with the entities on hand.'''
-        parts = frozenset(str(part) for part in
-                          (self.held_entities[0], self.held_entities[1]))
+        parts = frozenset(part.name for part in self.held_entities if part)
 
         if parts not in self.object_factory:
             return
@@ -199,9 +226,8 @@ class Tactile(Role):
         if self.stats.intelligence < min_intelligence:
             return
 
-        if str(self.held_entities[0]) in parts:
-            self.held_entities[0] = None
-        if str(self.held_entities[1]) in parts:
-            self.held_entities[1] = None
+        for i, part in enumerate(self.held_entities):
+            if part.name() in parts:
+                self.held_entities[i] = None
             
         self.put_underfoot(usable())
