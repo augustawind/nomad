@@ -15,11 +15,12 @@ class Stats:
 class Entity:
     '''A thing that exists in the plains.'''
 
-    def __init__(self, name, walkable,
+    def __init__(self, name, walkable, moveable=True,
                  stats=Stats(strength=1.0, agility=1.0, intelligence=1.0),
                  roles={}):
         self.name = name
         self.walkable = walkable
+        self.moveable = moveable
         self.stats = stats
 
         self.roles = roles
@@ -56,9 +57,6 @@ class Entity:
         '''Swizzle for (x, y).''')
     
     def get_in_reach(self):
-        '''Return all entities within reach as a mapping of z coords
-        to the entity underfoot and any unwalkable adjacent entities.
-        '''
         in_reach = []
         for entity in chain(self.held_entities, [self.get_underfoot()]):
             in_reach.append(entity)
@@ -79,7 +77,7 @@ class Entity:
         if dz is None:
             z = -1
         else:
-            z = self.plains.get_z(self) + dz
+            z = self.z + dz
         return self.plains.get_entity(self.x + dx, self.y + dy, z)
 
     def update(self, nomad):
@@ -98,8 +96,7 @@ class Entity:
         '''Place an entity just under this one.'''
         if not entity:
             return
-        z = self.plains.get_z(self)
-        self.plains.add_entity(entity, self.x, self.y, z)
+        self.plains.add_entity(entity, self.x, self.y, self.z)
     
     def wait(self):
         '''Do nothing.'''
@@ -112,4 +109,4 @@ class Entity:
         y = self.y + dy
         if not self.plains.walkable_at(x, y):
             return
-        self.plains.move_fromto(self.x, self.y, x, y) 
+        self.plains.move_entity(self, x, y) 

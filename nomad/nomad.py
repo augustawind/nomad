@@ -30,4 +30,4 @@ class Nomad(Entity):
         if not self.plains.walkable_at(self.x + dx, self.y + dy):
             return
         self.plains.shift(-dx, -dy)
-        self.plains.move_fromto(self.x, self.y, self.x + dx, self.y + dy)
+        self.plains.move_entity(self, self.x + dx, self.y + dy)

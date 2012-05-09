@@ -144,36 +144,33 @@ class Tactile(Role):
     def assign(self, entity):
         super().assign(entity)
 
-    def _get_in_reach_and_held(self):
-        if any(self.held_entities):
-            return self.held_entities, True
-        return self.entity.get_in_reach(), False
-
-    def _remove_entity(self, held, entity):
-        if held:
-            if None not in self.held_entities:
-                self.held_entities[1] = None
-            elif self.held_entities[0]:
-                self.held_entities[0] = None
-        else:
-            self.plains.remove_entity(entity)
-
     def eat_nearest(self):
-        entities, held = self._get_in_reach_and_held()
-        entity = entities[0]
-        if self.as_mortal.eat(entity):
-            self._remove_entity(held, entity)
+        for i, entity in enumerate(self.held_entities):
+            if entity and entity.as_edible:
+                if self.as_mortal.eat(entity):
+                    self.held_entities[i] = None
+                    return
+        self.as_mortal.eat_nearest()
 
     def pickup_nearest(self):
-        entities, held = self._get_in_reach_and_held()
+        # Get closest entity in reach.
+        entities = self.entity.get_in_reach()
         entity = entities[0]
+
+        # Quit if entity unmoveable.
+        if not entity.moveable:
+            return
+
+        # Put entity in a free hand, or quit if there isn't one.
         if self.held_entities[0] is None:
             self.held_entities[0] = entity
         elif self.held_entities[1] is None:
             self.held_entities[1] = entity
         else:
             return
-        self._remove_entity(False, entity)
+
+        # Remove the entity from the plains.
+        self.plains.remove_entity(entity)
 
     def drop_left(self):
         '''Drop the entity in the tactile's left hand underfoot.'''

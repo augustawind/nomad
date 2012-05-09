@@ -14,7 +14,7 @@ def strike(tool, actor, target):
 
 
 def earth(): return Entity(
-    'earth', True)
+    'earth', True, False)
 def rock(): return Entity(
     'rock', False)
 

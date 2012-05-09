@@ -117,7 +117,7 @@ def update_plains_window(win, display_dict, plains):
         for x in coords:
             # If xy is in the plains, draw the plains at that xy.
             if (x, y) in plains.entities:
-                entity = plains.get_entity(x, y)
+                entity = plains.get_entity(x, y, -1)
                 char, color = display_dict[entity.name]
             # Otherwise, draw an blank space.
             else:

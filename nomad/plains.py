@@ -24,18 +24,17 @@ class Plains:
             for z, e in enumerate(ents):
                 yield (x, y, z), e
 
-    @staticmethod
-    def _inform_entity(entity, x, y, z):
+    def _inform_entity(self, entity, x, y, z):
         '''Inform an entity of its xy positon.'''
+        assert self.entities.in_bounds(x, y)
         entity.x = x
         entity.y = y 
         entity.z = z
 
-    @classmethod
-    def _inform_entities(cls, entities):
+    def _inform_entities(self, entities):
         '''Inform many  entities of their xy positions.'''
-        for point, entity in cls._iter_entities(entities):
-            cls._inform_entity(entity, *point)
+        for point, entity in self._iter_entities(entities):
+            self._inform_entity(entity, *point)
 
     def _init_entity(self, entity, x, y, z):
         entity.plains = self
@@ -45,22 +44,11 @@ class Plains:
         for (x, y, z), e in self._iter_entities(entities):
             self._init_entity(e, x, y, z)
 
-    def z_in_bounds(self, x, y, z):
-        '''Does an entity exist at (x, y, z), given that at least one
-        exists at x and y?
-        '''
-        return 0 <= z < len(self.entities[(x, y)])
-
     def walkable_at(self, x, y):
         '''Are all entities walkable at point (x, y)?'''
         xy = (x, y)
         return (xy in self.entities and
                 all(e.walkable for e in self.entities[xy]))
-
-    def get_z(self, entity):
-        '''Return the z coordinate of an entity on this plains.'''
-        x, y = entity.pos
-        return self.entities[(x, y)].index(entity)
 
     def get_entity(self, x, y, z=-1):
         '''Return the entity at the given coordinates on this plains.'''
@@ -77,44 +65,52 @@ class Plains:
         for (x, y), ents in self.entities.items():
             for z in range(len(ents)):
                 yield x, y, z
+
+    def z_in_bounds(self, x, y, z):
+        '''Does an entity exist at (x, y, z)?'''
+        return 0 <= z < len(self.entities[(x, y)])
     
     def add_entity(self, entity, x, y, z=-1):
-        '''Add an entity at the given x, y, z. If z is out of bounds, append it
-        to the top.
+        '''Add an entity at the given x, y, z. If z is -1, append it to
+        the top.
         '''
-        xy = (x, y)
-        if xy not in self.entities:
-            return
+        entities = self.entities[(x, y)]
 
-        entities = self.entities[xy]
-        if self.z_in_bounds(x, y, z):
-            entities.insert(z, entity)
-        else:
+        # If z is -1, append entity to the top.
+        if z == -1:
             entities.append(entity)
+            z = len(entities) - 1
+        # Else, if z is in bounds, insert entity at z.
+        elif self.z_in_bounds(x, y, z):
+            entities.insert(z, entity)
+            # Update z coords of above entities.
+            for entity in entities[z:]:
+                entity.z += 1
+        # Otherwise, terminate.
+        else:
+            return
+        # Initialize the entity at its new position.
         self._init_entity(entity, x, y, z)
 
     def pop_entity(self, x, y, z=-1):
-        '''Remove and return the entity at the given x, y, z. If z is out of
-        bounds, pop the topmost entity. If no entity exists there, return None.
+        '''Remove and return the entity at the given x, y, z. If z is -1,
+        pop the topmost entity.
         '''
-        xy = (x, y)
-        if xy in self.entities:
-            ents = self.entities[xy]
-            if z < 0 or z >= len(ents):
-                entity = ents.pop()
-            else:
-                entity = ents.pop(z)
-            if not ents:
-                del self.entities[xy]
-            return entity
+        return self.entities[(x, y)].pop(z)
 
     def remove_entity(self, entity):
-        del self.entities[entity.pos][entity.z]
+        entities = self.entities[entity.pos]
+        z = entity.z
+        # Delete the entity at its x, y, z position.
+        del entities[z]
+        # Update z coords of above entities.
+        for entity in entities[z:]:
+            entity.z -= 1
 
-    def move_fromto(self, x1, y1, x2, y2, z1=-1, z2=-1):
+    def move_entity(self, entity, x, y, z=-1):
         '''Remove the entity at (x1, y1, z1) and add it to (x2, y2, z2).'''
-        entity = self.pop_entity(x1, y1, z1)
-        self.add_entity(entity, x2, y2, z2)
+        self.remove_entity(entity)
+        self.add_entity(entity, x, y, z)
 
     def shift(self, dx, dy):
         assert dx or dy
