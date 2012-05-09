@@ -40,7 +40,7 @@ def main(stdscr):
     nomad = Nomad(los=6)
     los = nomad.los
     half_los = los // 2 + 1
-    plains = Plains.with_floor(earth(),
+    plains = Plains.with_floor(earth,
                                gen.chance(
                                    {90: grass, 10: flower,
                                     3: mushroom, 5: stick,

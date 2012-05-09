@@ -25,7 +25,8 @@ class Octagon(dict):
             Lower Left diagonal boundary.
     '''
 
-    def __init__(self, up, right, down, left, ul, ur, lr, ll, default=None):
+    def __init__(self, up, right, down, left, ul, ur, lr, ll,
+                 default=lambda: None):
         self.up = up
         self.right = right
         self.down = down
@@ -35,15 +36,17 @@ class Octagon(dict):
         self.lr = lr
         self.ll = ll
 
+        self.size_params = (up, right, down, left, ul, ur, lr, ll)
+
         for y in range(self.up, self.down + 1):
             for x in range(self.left, self.right + 1):
                 if self.in_bounds(x, y):
-                    self[(x, y)] = default
+                    self[(x, y)] = default()
 
     def in_bounds(self, x, y):
-        if x < self.left:  return False
+        if x < self.left:      return False
         if x > self.right + 1: return False
-        if y < self.up:    return False
+        if y < self.up:        return False
         if y > self.down + 1:  return False
 
         if x - self.ul.x < self.ul.y - y: return False
@@ -66,7 +69,7 @@ class Plains:
 
     @classmethod
     def with_floor(cls, floor_entity, generate, *shape_args, **shape_kws):
-        shape_kws['default'] = [floor_entity] 
+        shape_kws['default'] = lambda: [floor_entity()] 
         return cls(Octagon(*shape_args, **shape_kws),
                    floor_entity, generate)
 
@@ -135,15 +138,14 @@ class Plains:
         to the top.
         '''
         xy = (x, y)
-        if xy in self.entities:
-            entities = self.entities[xy]
-            if self.z_in_bounds(x, y, z):
-                entities.insert(z, entity)
-            else:
-                entities.append(entity)
-        elif self.entities.in_bounds(x, y):
-            self.entities[xy] = [entity]
+        if xy not in self.entities:
+            return
 
+        entities = self.entities[xy]
+        if self.z_in_bounds(x, y, z):
+            entities.insert(z, entity)
+        else:
+            entities.append(entity)
         self._init_entity(entity, x, y)
 
     def pop_entity(self, x, y, z=-1):
@@ -236,21 +238,20 @@ class Plains:
                 if y_ == y: xs.append(x_)
                 if x_ == x: ys.append(y_)
 
-            dy_gen = (x, min(ys))
-            dy_del = (x, max(ys))
-            dx_gen = (min(xs), y)
-            dx_del = (max(xs), y)
-            if dy and not dx:
-                update_coords(dy, dy_gen, dy_del)
-            elif dx and not dy:
-                update_coords(dx, dx_gen, dy_del)
-            elif dx and dy:
-                to_gen = (dy_gen + dx_gen) // 2
-                to_del = (dy_del + dx_del) // 2
-                update_coords = (dx * dy, to_gen, to_del)
+            if dx and dy:
+                pass
+            else:
+                dy_gen = Point(x, min(ys))
+                dy_del = Point(x, max(ys))
+                dx_gen = Point(min(xs), y)
+                dx_del = Point(max(xs), y)
+                if dy:
+                    update_coords(dy, dy_gen, dy_del)
+                elif dx:
+                    update_coords(dx, dx_gen, dy_del)
 
-
-        new_entities = {}
+        new_entities = Octagon(*self.entities.size_params,
+                               default=lambda: [self.floor_entity()])
         for x, y in self.entities:
             p = (x, y)
             if p in del_coords:
