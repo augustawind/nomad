@@ -165,11 +165,11 @@ def player_commands():
     move_downleft = make_move_nomad(*DIR_DOWNLEFT)
     move_downright = make_move_nomad(*DIR_DOWNRIGHT)
 
-    def eat_underfoot(nomad):
-        nomad.as_mortal.eat_underfoot()
+    def eat_nearest(nomad):
+        nomad.as_mortal.eat_nearest()
 
-    def pickup_underfoot(nomad):
-        nomad.as_tactile.pickup_underfoot()
+    def pickup_nearest(nomad):
+        nomad.as_tactile.pickup_nearest()
 
     def drop_all(nomad):
         nomad.as_tactile.drop_all()
@@ -193,8 +193,8 @@ def player_commands():
         (KEY('n'),):           move_downright,
 
         (KEY('w'),): Nomad.wait,
-        (KEY('e'),): eat_underfoot,
-        (KEY('g'),): pickup_underfoot,
+        (KEY('e'),): eat_nearest,
+        (KEY('g'),): pickup_nearest,
         (KEY('d'),): drop_all,
         (KEY('m'),): make_tool,
         })

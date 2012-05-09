@@ -1,4 +1,7 @@
 '''things that exist in the plains'''
+from collections import OrderedDict
+
+from nomad.util import DIRECTIONS
 
 class Entity:
     '''A thing that exists in the plains.'''
@@ -32,6 +35,43 @@ class Entity:
     pos = property(_get_pos, _set_pos, doc=
         '''Swizzle for (x, y).''')
 
+    def get_accessable(self):
+        '''Get all entities that are within this one's abilities to
+        have access to.
+
+        By default, this does the same thing as `get_in_reach`.
+        This method can be overrided by subclasses to provide
+        extended behavior.
+        '''
+        return self.get_in_reach()
+    
+    def get_in_reach(self):
+        '''Return all entities within reach as a mapping of z coords
+        to the entity underfoot and any unwalkable adjacent entities.
+        '''
+        z, entity = self.get_underfoot()
+        in_reach = OrderedDict([(z, entity)])
+        for dx, dy in DIRECTIONS:
+            z, entity = self.get_adjacent(dx, dy)
+            if entity.walkable:
+                continue
+            in_reach[z] = entity
+        return in_reach 
+
+    def get_underfoot(self):
+        '''Return the z coordinate and the entity just under this one.'''
+        return self.get_adjacent(0, 0, -1)
+
+    def get_adjacent(self, dx, dy, dz=None):
+        '''Return the z coordinate and entity adjacent to this one in the
+        specified x, y, and z directions.
+        '''
+        if dz is None:
+            z = -1
+        else:
+            z = self.plains.get_z(self) + dz
+        return z, self.plains.get_entity(self.x + dx, self.y + dy, z)
+
     def update(self, nomad):
         '''Update the entity for each of its roles, given a `Nomad`.
         
@@ -43,11 +83,6 @@ class Entity:
                       'as_reactor', 'as_mortal', 'as_tactile')):
             if role:
                 role.update(nomad)
-
-    def get_underfoot(self):
-        '''Return the z coordinate and the entity just under this one.'''
-        z = self.plains.get_z(self) - 1
-        return z, self.plains.get_entity(self.x, self.y, z)
 
     def put_underfoot(self, entity):
         '''Place an entity just under this one.'''

@@ -4,19 +4,8 @@ N   O    M    A   D    <>     T     O     D     O
 Tidy up.
 ^^^^^^^^^
 
-    #) Rewrite Plains.shift method.
-
-
-Implement reach.
-^^^^^^^^^^^^^^^^
-
-    #) Write method Entity.in_reach.
-       Yields the entity underfoot plus any adjacent, unwalkable
-       entities.
-
-    #) Change all Entity methods that operate on the entity underfoot to
-       operate on the entity underfoot if possible, and otherwise to let
-       the player select an adjacent entity with the cursor.
+    #) Fix Plains.shift so that it creates a perfectly symmetrical
+       octogon.
 
 
 Implement weapons.

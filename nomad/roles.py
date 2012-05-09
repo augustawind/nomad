@@ -127,9 +127,9 @@ class Mortal(Role):
             return True
         return False
 
-    def eat_underfoot(self):
-        '''Attempt to eat the entity underfoot.'''
-        z, entity = self.get_underfoot()
+    def eat_nearest(self):
+        entities = self.get_accessable()
+        z, entity = entities.popitem(last=False)
         if self.eat(entity):
             self.plains.pop_entity(self.entity.x, self.entity.y, z)
 
@@ -143,9 +143,9 @@ class Tactile(Role):
         self.left_held = left_held
         self.right_held = right_held
 
-    def pickup_underfoot(self):
-        '''Pick up the entity underfoot.'''
-        z, entity = self.get_underfoot()
+    def pickup_nearest(self):
+        entities = self.get_accessable()
+        z, entity = entities.popitem(last=False)
         if self.left_held is None:
             self.left_held = entity
         elif self.right_held is None:
