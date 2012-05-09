@@ -10,8 +10,8 @@ import nomad.plainsgen as gen
 from nomad.util import *
 
 # Subwindow dimensions as (height, width, y, x)
-PLAINS_WIN = (20, 20, 0, 0)
-STATUS_WIN = (20, 20, 0, 21)
+PLAINS_WIN = (21, 21, 1, 1)
+STATUS_WIN = (21, 21, 0, 22)
 
 # curses color pair numbers (for `init_color_pairs` and `render_info`)
 PAIR_RED = 1

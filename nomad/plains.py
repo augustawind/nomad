@@ -2,61 +2,6 @@
 from nomad.entity import Entity
 from nomad.util import *
 
-class Octagon(dict):
-    '''A mapping of (x, y) tuples to arbitrary values. The coordinates
-    form an octagon.
-
-    `Properties`
-        `up` : int
-            Lower y boundary.
-        `down` : int
-            Upper y boundary.
-        `left` : int
-            Lower x boundary.
-        `right` : int
-            Upper x boundary.
-        `ul` : `Point`
-            Upper Left diagonal boundary.
-        `ur` : `Point`
-            Upper Right diagonal boundary.
-        `lr` : `Point`
-            Lower Right diagonal boundary.
-        `ll` : `Point`
-            Lower Left diagonal boundary.
-    '''
-
-    def __init__(self, up, right, down, left, ul, ur, lr, ll,
-                 default=lambda: None):
-        self.up = up
-        self.right = right
-        self.down = down
-        self.left = left
-        self.ul = ul
-        self.ur = ur 
-        self.lr = lr
-        self.ll = ll
-
-        self.size_params = (up, right, down, left, ul, ur, lr, ll)
-
-        for y in range(self.up, self.down + 1):
-            for x in range(self.left, self.right + 1):
-                if self.in_bounds(x, y):
-                    self[(x, y)] = default()
-
-    def in_bounds(self, x, y):
-        if x < self.left:      return False
-        if x > self.right + 1: return False
-        if y < self.up:        return False
-        if y > self.down + 1:  return False
-
-        if x - self.ul.x < self.ul.y - y: return False
-        if x - self.ur.x < y - self.ur.y: return False
-        if x - self.ll.x > y - self.ll.y: return False
-        if x - self.lr.x > self.lr.y - y: return False
-
-        return True
-
-
 class Plains:
     '''A shifting world that generates itself as it moves.'''
 
@@ -169,97 +114,80 @@ class Plains:
         self.add_entity(entity, x2, y2, z2)
 
     def shift(self, dx, dy):
-        '''Shift the plains in the given x and y directions.'''
         assert dx or dy
+        gen_coords = set()
 
-        gen_coords = []
-        del_coords = []
-
-        if dy:
-            xs = set(x for x, y in self.entities)
-            for x in xs:
-                y1 = min(y for x_, y in self.entities if x_ == x)
-                y2 = max(y for x_, y in self.entities if x_ == x)
-                p1 = (x, y1)
-                p2 = (x, y2)
-                if dy < 0:
-                    gen_coords.append(p1)
-                    del_coords.append(p2)
-                else:
-                    del_coords.append(p1)
-                    gen_coords.append(p2)
-
-        if dx:
-            ys = set(y for x, y in self.entities)
-            for y in ys:
-                x1 = min(x for x, y_ in self.entities if y_ == y)
-                x2 = max(x for x, y_ in self.entities if y_ == y)
-                p1 = (x1, y)
-                p2 = (x2, y)
-                if dx < 0:
-                    gen_coords.append(p1)
-                    del_coords.append(p2)
-                else:
-                    del_coords.append(p1)
-                    gen_coords.append(p2)
-
-        new_entities = {}
-        for x, y in self.entities:
-            p = (x, y)
-            if p in del_coords:
-                continue
-            new_entities[(x - dx , y - dy)] = self.entities[p]
-
-        edge_entities = self.generate(self, gen_coords)
-        self._init_entities(edge_entities)
-        self._inform_entities(new_entities)
-        new_entities.update(edge_entities)
-        self.entities = new_entities
-
-    def shift(self, dx, dy):
-        '''Shift the plains in the given x and y directions.'''
-        assert dx or dy
-
-        gen_coords = []
-        del_coords = []
-
-        def update_coords(d, to_gen, to_del):
-            if d < 0:
-                gen_coords.append(to_gen)
-                del_coords.append(to_del)
+        # Shift all entities by (dx, dy).
+        entities = Octagon(*self.entities.params)
+        for (x, y), ents in self.entities.items():
+            new_point = Point(x + dx, y + dy)
+            # Only move entity if new point is in bounds.
+            if self.entities.in_bounds(*new_point):
+                entities[new_point] = ents
             else:
-                del_coords.append(to_gen)
-                gen_coords.append(to_del)
+                gen_coords.add(Point(-x, -y))
 
-        for x, y in self.entities:
-            xs = []
-            ys = []
-            for x_, y_ in self.entities:
-                if y_ == y: xs.append(x_)
-                if x_ == x: ys.append(y_)
+        # Generate new entities to fill open edge.
+        new_entities = self.generate(self, gen_coords)
+        self._init_entities(new_entities)
+        self._inform_entities(entities)
+        entities.update(new_entities)
+        self.entities = entities
 
-            if dx and dy:
-                pass
-            else:
-                dy_gen = Point(x, min(ys))
-                dy_del = Point(x, max(ys))
-                dx_gen = Point(min(xs), y)
-                dx_del = Point(max(xs), y)
-                if dy:
-                    update_coords(dy, dy_gen, dy_del)
-                elif dx:
-                    update_coords(dx, dx_gen, dy_del)
 
-        new_entities = Octagon(*self.entities.size_params,
-                               default=lambda: [self.floor_entity()])
-        for x, y in self.entities:
-            p = (x, y)
-            if p in del_coords:
-                continue
-            new_entities[(x - dx, y - dy)] = self.entities[p]
+class Octagon(dict):
+    '''A mapping of (x, y) tuples to arbitrary values. The coordinates
+    form an octagon.
 
-        edge_entities = self.generate(self, gen_coords)
-        self._init_entities(edge_entities)
-        self._inform_entities(new_entities)
-        new_entities.update(edge_entities)
-        self.entities = new_entities
+    `Properties`
+        `up` : int
+            Lower y boundary.
+        `down` : int
+            Upper y boundary.
+        `left` : int
+            Lower x boundary.
+        `right` : int
+            Upper x boundary.
+        `ul` : `Point`
+            Upper Left diagonal boundary.
+        `ur` : `Point`
+            Upper Right diagonal boundary.
+        `lr` : `Point`
+            Lower Right diagonal boundary.
+        `ll` : `Point`
+            Lower Left diagonal boundary.
+    '''
+
+    def __init__(self, up, right, down, left, ul, ur, lr, ll,
+                 default=lambda: None):
+        self.up = up
+        self.right = right
+        self.down = down
+        self.left = left
+        self.ul = ul
+        self.ur = ur 
+        self.lr = lr
+        self.ll = ll
+        self.default = default
+
+        self.params = (up, right, down, left, ul, ur, lr, ll, default)
+
+        for y in range(self.up, self.down + 1):
+            for x in range(self.left, self.right + 1):
+                if self.in_bounds(x, y):
+                    self[Point(x, y)] = default()
+
+    def in_bounds(self, x, y):
+        if x < self.left:  return False
+        if x > self.right: return False
+        if y < self.up:    return False
+        if y > self.down:  return False
+
+        if x - self.ul.x < self.ul.y - y: return False
+        if x - self.ur.x < y - self.ur.y: return False
+        if x - self.ll.x > y - self.ll.y: return False
+        if x - self.lr.x > self.lr.y - y: return False
+
+        return True
+
+
