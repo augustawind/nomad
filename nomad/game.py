@@ -174,8 +174,8 @@ def player_commands():
     def drop_all(nomad):
         nomad.as_tactile.drop_all()
 
-    def make_tool(nomad):
-        nomad.as_tactile.make_tool()
+    def combine_objects(nomad):
+        nomad.as_tactile.combine_objects()
 
     def flatten_keys(d):
         return dict((key, v) for keys, v in d.items() for key in keys)
@@ -196,7 +196,7 @@ def player_commands():
         (KEY('e'),): eat_nearest,
         (KEY('g'),): pickup_nearest,
         (KEY('d'),): drop_all,
-        (KEY('m'),): make_tool,
+        (KEY('c'),): combine_objects,
         })
 
 

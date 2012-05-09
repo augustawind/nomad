@@ -1,5 +1,4 @@
 '''entity behaviors'''
-from functools import wraps
 
 class Role:
     '''Abstract class for `Entity` behaviors.'''
@@ -43,7 +42,7 @@ class Edible(Role):
         self.nutrition = nutrition
 
 
-class Tool(Role):
+class Usable(Role):
     '''Something that can be "used" on another Entity.'''
 
     def __init__(self, on_use):
@@ -51,7 +50,7 @@ class Tool(Role):
         self.on_use = on_use
 
     def use_on(self, entity):
-        '''Use the tool on another entity.'''
+        '''Use the usable on another entity.'''
         self.on_use(self, entity)
 
 
@@ -119,10 +118,10 @@ class Mortal(Role):
 
     def eat(self, entity):
         '''Attempt to eat an entity. Return True if successful, else False.'''
-        food = entity.as_food
-        if food:
-            self.satiation = self.satiation + food.satiation
-            self.health = self.health + food.nutrition
+        edible = entity.as_edible
+        if edible:
+            self.satiation = self.satiation + edible.satiation
+            self.health = self.health + edible.nutrition
             return True
         return False
 
@@ -136,9 +135,9 @@ class Mortal(Role):
 class Tactile(Role):
     '''Something that has fine motor control.'''
 
-    def __init__(self, tool_factory, left_held=None, right_held=None):
+    def __init__(self, object_factory, left_held=None, right_held=None):
         super().__init__()
-        self.tool_factory = tool_factory
+        self.object_factory = object_factory
         self.left_held = left_held
         self.right_held = right_held
 
@@ -168,15 +167,15 @@ class Tactile(Role):
         self.drop_left()
         self.drop_right()
 
-    def make_tool(self):
-        '''Attempt to make a tool with the entities on hand.'''
+    def combine_objects(self):
+        '''Attempt to make a usable with the entities on hand.'''
         parts = frozenset(str(part) for part in
                           (self.left_held, self.right_held))
 
-        if parts not in self.tool_factory:
+        if parts not in self.object_factory:
             return
 
-        min_intelligence, tool = self.tool_factory[parts]
+        min_intelligence, usable = self.object_factory[parts]
         if self.stats.intelligence < min_intelligence:
             return
 
@@ -185,4 +184,4 @@ class Tactile(Role):
         if str(self.right_held) in parts:
             self.right_held = None
             
-        self.put_underfoot(tool())
+        self.put_underfoot(usable())

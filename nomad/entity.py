@@ -16,18 +16,14 @@ class Entity:
 
     def __init__(self, name, walkable,
                  stats=Stats(strength=1.0, agility=1.0, intelligence=1.0),
-                 as_matter=None, as_food=None, as_tool=None, as_actor=None,
-                 as_reactor=None, as_mortal=None, as_tactile=None):
+                 roles={}):
         self.name = name
         self.walkable = walkable
         self.stats = stats
 
-        for attr in ('as_matter', 'as_food', 'as_tool', 'as_actor',
-                     'as_reactor', 'as_mortal', 'as_tactile'):
-            role = eval(attr)
-            setattr(self, attr, role)
-            if role:
-                role.assign(self)
+        self.roles = roles
+        for role in self.roles.values():
+            role.assign(self)
 
         self.x = None
         self.y = None
@@ -36,6 +32,17 @@ class Entity:
     def __str__(self):
         '''Return the entity's name.'''
         return self.name
+
+    def get_role(self, role_name):
+        return self.roles.get(role_name, None)
+
+    as_matter = property(lambda self: self.get_role('matter'))
+    as_edible = property(lambda self: self.get_role('edible'))
+    as_usable = property(lambda self: self.get_role('usable'))
+    as_actor = property(lambda self: self.get_role('actor'))
+    as_reactor = property(lambda self: self.get_role('reactor'))
+    as_mortal = property(lambda self: self.get_role('mortal'))
+    as_tactile = property(lambda self: self.get_role('tactile'))
 
     def _get_pos(self):
         return self.x, self.y
@@ -88,7 +95,7 @@ class Entity:
         `Role.update`.
         '''
         for role in (getattr(self, a) for a in
-                     ('as_matter', 'as_food', 'as_tool', 'as_actor',
+                     ('as_matter', 'as_edible', 'as_usable', 'as_actor',
                       'as_reactor', 'as_mortal', 'as_tactile')):
             if role:
                 role.update(nomad)

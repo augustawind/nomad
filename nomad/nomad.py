@@ -6,7 +6,7 @@ from nomad.entities import *
 class Nomad(Entity):
     '''The player-controlled entity.'''
 
-    tool_factory = {
+    object_factory = {
         frozenset(('sharp rock', 'stick')): (3, spear),
         }
 
@@ -18,9 +18,9 @@ class Nomad(Entity):
                 How far the nomad sees in any direction. Should be
                 equal to the plains' radius, once set.
         '''
-        super().__init__('nomad', False, stats,
-                         as_mortal=Mortal(),
-                         as_tactile=Tactile(self.tool_factory))
+        super().__init__('nomad', False, stats, roles=dict(
+                         mortal=Mortal(),
+                         tactile=Tactile(self.object_factory)))
         self.los = los
 
     def move(self, dx, dy):
