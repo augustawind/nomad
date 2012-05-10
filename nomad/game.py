@@ -4,6 +4,8 @@ from curses import KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN
 from functools import partial
 
 from nomad.entities import *
+from nomad import interface
+from nomad.interface import *
 from nomad.nomad import Nomad
 from nomad.plains import Plains
 import nomad.plainsgen as gen
@@ -13,14 +15,6 @@ from nomad.util import *
 PLAINS_WIN = (21, 21, 1, 1)
 STATUS_WIN = (21, 21, 0, 22)
 
-# curses color pair numbers (for `init_color_pairs` and `render_info`)
-PAIR_RED = 1
-PAIR_GREEN = 2
-PAIR_YELLOW = 3
-PAIR_BLUE = 4
-PAIR_MAGENTA = 5
-PAIR_CYAN = 6
-PAIR_WHITE = 7
 
 def run():
     '''Initialize curses and call `main`.'''
@@ -52,19 +46,21 @@ def main(stdscr):
                                ll=Point(half_los, -half_los),)
     plains.add_entity(nomad, 0, 0)
 
-    # Initialize the user interface.
+    # Make windows.
     plains_win = curses.newwin(*PLAINS_WIN) 
     status_win = curses.newwin(*STATUS_WIN)
-
     # Get rendering data.
     display_dict = render_info()
+    # Initialize user interface.
+    interface.ui = interface.Interface(stdscr, plains_win, status_win,
+                                       nomad, display_dict)
     # Get keybindings.
     command_dict = player_commands()
     # Execute the main loop while the nomad lives.
     while nomad.as_mortal.alive:
         # Update the screen.
-        update_plains_window(plains_win, display_dict, plains)
-        update_status_window(status_win, nomad)
+        interface.ui.update_plains_window()
+        interface.ui.update_status_window()
 
         # Handle user input.
         key = stdscr.getch()
@@ -76,57 +72,6 @@ def main(stdscr):
 
     # Game over.
     game_over(stdscr, nomad)
-
-
-def update_status_window(win, nomad):
-    '''Draw some information about a `Nomad` on a window.'''
-    win.clear()
-    y = 1
-    x = 2
-    ystep = 1
-
-    win.addstr(y, x, '---- Nomad -----')
-    y += ystep
-
-    y += ystep
-    win.addstr(y, x, 'Health: ')
-    win.addstr('{:.0f}'.format(nomad.as_mortal.health))
-    y += ystep
-    win.addstr(y, x, 'Satiation: ')
-    win.addstr('{:.0f}'.format(nomad.as_mortal.satiation))
-    y += ystep
-
-    y += ystep
-    win.addstr(y, x, 'LH: ')
-    win.addstr(str(nomad.as_tactile.held_entities[0]))
-    y+= ystep
-    win.addstr(y, x, 'RH: ')
-    win.addstr(str(nomad.as_tactile.held_entities[1]))
-
-    win.box()
-    win.refresh()
-
-
-def update_plains_window(win, display_dict, plains):
-    '''Draw a `Plains` on a window, given rendering information.'''
-    win.clear()
-
-    coords = range(plains.entities.left, plains.entities.right + 1)
-    # For y, x in the boundary rectangle of the plains
-    for y in coords:
-        for x in coords:
-            # If xy is in the plains, draw the plains at that xy.
-            if (x, y) in plains.entities:
-                entity = plains.get_entity(x, y, -1)
-                char, color = display_dict[entity.name]
-            # Otherwise, draw an blank space.
-            else:
-                char = ' '
-                color = PAIR_WHITE
-            win.addnstr(y + plains.entities.down, x + plains.entities.right,
-                        char, 1, curses.color_pair(color))
-
-    win.refresh()
 
 
 def update_entities(nomad, plains):

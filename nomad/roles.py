@@ -155,9 +155,8 @@ class Mortal(Role):
         return False
 
     def eat_nearest(self):
-        entities = self.get_in_reach()
-        entity = entities[0]
-        if self.as_mortal.eat(entity):
+        entity = self.select_in_reach()
+        if entity and self.as_mortal.eat(entity):
             self.plains.remove_entity(entity)
 
 
@@ -174,19 +173,17 @@ class Tactile(Role):
 
     def eat_nearest(self):
         for i, entity in enumerate(self.held_entities):
-            if entity and entity.as_edible:
-                if self.as_mortal.eat(entity):
-                    self.held_entities[i] = None
-                    return
+            if entity and self.as_mortal.eat(entity):
+                self.held_entities[i] = None
+                return
         self.as_mortal.eat_nearest()
 
     def pickup_nearest(self):
         # Get closest entity in reach.
-        entities = self.entity.get_in_reach()
-        entity = entities[0]
+        entity = self.select_in_reach()
 
         # Quit if entity unmoveable.
-        if not entity.moveable:
+        if not entity or not entity.moveable:
             return
 
         # Put entity in a free hand, or quit if there isn't one.

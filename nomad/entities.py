@@ -42,5 +42,5 @@ def spear(): return Entity(
         'usable': Usable(strike)})
 
 def yak(): return Entity(
-    'yak', False, roles={
+    'yak', False, False, roles={
         'actor': Actor(shuffle)})

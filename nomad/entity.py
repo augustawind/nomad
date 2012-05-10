@@ -2,6 +2,7 @@
 from collections import OrderedDict, namedtuple
 from itertools import chain
 
+from nomad import interface
 from nomad.util import DIRECTIONS
 
 class Stats:
@@ -55,6 +56,19 @@ class Entity:
         self.x, self.y = pos
     pos = property(_get_pos, _set_pos, doc=
         '''Swizzle for (x, y).''')
+
+    def select_in_reach(self):
+        dirs = []
+        for entity in self.get_in_reach():
+            dx = entity.x - self.x
+            if dx:
+                dx /= abs(dx)
+            dy = entity.y - self.y
+            if dy:
+                dy /= abs(dy)
+            dirs.append((dx, dy))
+
+        return interface.ui.select_adjacent_entity(*dirs)
     
     def get_in_reach(self):
         in_reach = []
@@ -65,7 +79,7 @@ class Entity:
             if not entity.walkable:
                 in_reach.append(entity)
         return in_reach 
-
+    
     def get_underfoot(self):
         '''Return the entity just under this one.'''
         return self.get_adjacent(0, 0, -1)
