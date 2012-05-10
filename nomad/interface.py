@@ -1,4 +1,5 @@
 import curses
+from curses import KEY_LEFT, KEY_RIGHT, KEY_UP, KEY_DOWN
 
 from nomad.util import *
 
@@ -11,45 +12,59 @@ PAIR_MAGENTA = 5
 PAIR_CYAN = 6
 PAIR_WHITE = 7
 
+KEY_ENTER = ord(' ')
+KEY_YES = ord('y')
+KEY_NO = ord('n')
+
 ui = None
+
+key_to_dir = flatten_keys({
+    (ord('s'),): (0, 0),
+    (ord('h'), KEY_LEFT): DIR_LEFT,
+    (ord('j'), KEY_DOWN): DIR_DOWN,
+    (ord('k'), KEY_UP): DIR_UP,
+    (ord('l'), KEY_RIGHT): DIR_RIGHT,
+    (ord('y'),): DIR_UPLEFT,
+    (ord('u'),): DIR_UPRIGHT,
+    (ord('b'),): DIR_DOWNLEFT,
+    (ord('n'),): DIR_DOWNRIGHT,})
 
 class Interface:
 
-    def __init__(self, stdscr, plains_win, status_win, nomad, display_dict):
+    def __init__(self, stdscr, plains_win, status_win, nomad, display_dict,
+                 command_dict):
         self.stdscr = stdscr
         self.plains_win = plains_win
         self.status_win = status_win
         self.nomad = nomad
+        self.plains = nomad.plains
         self.display_dict = display_dict
+        self.command_dict = command_dict
 
-        self.dir_selector =  {
-                ord('s'): (0, 0),
-                ord('h'): DIR_LEFT,
-                ord('j'): DIR_DOWN,
-                ord('k'): DIR_UP,
-                ord('l'): DIR_RIGHT,
-                ord('y'): DIR_UPLEFT,
-                ord('u'): DIR_UPRIGHT,
-                ord('b'): DIR_DOWNLEFT,
-                ord('n'): DIR_DOWNRIGHT,}
+    def select_adjacent_entity(self):
+        '''Prompt the player to select an entity adjacent to the nomad.
 
-    @property
-    def plains(self):
-        return self.nomad.plains
-
-    def select_adjacent_entity(self, *dirs):
+        The player presses the corresponding movement key for the desired
+        direction. 's' selects the entity underfoot.
+        '''
+        # Highlight nomad.
         los = self.nomad.los
         x, y = self.nomad.pos
         self.plains_win.chgat(y + los, x + los, 1, curses.A_REVERSE)
-        cmd = None
-        while True:
-            cmd = self.plains_win.getch()
-            if cmd not in self.dir_selector:
-                continue
 
-            self.update_plains_window()
-            dx, dy = self.dir_selector[cmd]
-            self.plains_win.chgat(y + los, x + los, 1, curses.A_REVERSE)
+        cmd = None
+        dx = dy = 0
+        while True:
+            # Get keyboard input.
+            while cmd != KEY_ENTER:
+                cmd = self.plains_win.getch()
+                if cmd not in key_to_dir:
+                    continue
+
+                self.update_plains_window()
+                dx, dy = key_to_dir[cmd]
+                self.plains_win.chgat(y + los + dy, x + los + dx, 1,
+                                      curses.A_REVERSE)
 
             if (dx, dy) == (0, 0):
                 return self.nomad.get_underfoot()
@@ -94,7 +109,8 @@ class Interface:
         '''Draw a `Plains` on a window, given rendering information.'''
         self.plains_win.clear()
 
-        coords = range(self.plains.entities.left, self.plains.entities.right + 1)
+        coords = range(self.plains.entities.left,
+                       self.plains.entities.right + 1)
         # For y, x in the boundary rectangle of the plains
         for y in coords:
             for x in coords:
@@ -111,3 +127,8 @@ class Interface:
                             char, 1, curses.color_pair(color))
 
         self.plains_win.refresh()
+
+    def interact(self):
+        key = self.plains_win.getch()
+        if key in self.command_dict:
+            self.command_dict[key](self.nomad)

@@ -30,8 +30,9 @@ def main(stdscr):
     '''Run the game, given a curses ``stdscr``.'''
     init_color_pairs()
 
-    # Define the world.
+    # Define the nomad.
     nomad = Nomad(los=6)
+    # Define the plains.
     los = nomad.los
     half_los = los // 2 + 1
     plains = Plains.with_floor(earth,
@@ -44,6 +45,7 @@ def main(stdscr):
                                ur=Point(-half_los, half_los),
                                lr=Point(half_los, half_los),
                                ll=Point(half_los, -half_los),)
+    # Add nomad to plains.
     plains.add_entity(nomad, 0, 0)
 
     # Make windows.
@@ -51,21 +53,20 @@ def main(stdscr):
     status_win = curses.newwin(*STATUS_WIN)
     # Get rendering data.
     display_dict = render_info()
-    # Initialize user interface.
-    interface.ui = interface.Interface(stdscr, plains_win, status_win,
-                                       nomad, display_dict)
     # Get keybindings.
     command_dict = player_commands()
+    # Initialize user interface.
+    interface.ui = interface.Interface(stdscr, plains_win, status_win,
+                                       nomad, display_dict, command_dict)
+
     # Execute the main loop while the nomad lives.
     while nomad.as_mortal.alive:
         # Update the screen.
         interface.ui.update_plains_window()
         interface.ui.update_status_window()
 
-        # Handle user input.
-        key = stdscr.getch()
-        if key in command_dict:
-            command_dict[key](nomad)
+        # Get and handle user input.
+        interface.ui.interact()
 
         # Update all entities.
         update_entities(nomad, plains)
@@ -101,14 +102,9 @@ def player_commands():
             nomad.move(dx, dy)
         return move_nomad
 
-    move_up = make_move_nomad(*DIR_UP)
-    move_down = make_move_nomad(*DIR_DOWN)
-    move_left = make_move_nomad(*DIR_LEFT)
-    move_right = make_move_nomad(*DIR_RIGHT)
-    move_upleft = make_move_nomad(*DIR_UPLEFT)
-    move_upright = make_move_nomad(*DIR_UPRIGHT)
-    move_downleft = make_move_nomad(*DIR_DOWNLEFT)
-    move_downright = make_move_nomad(*DIR_DOWNRIGHT)
+    # Assign movement keys (from `interface.key_to_dir`).
+    commands = dict((key, make_move_nomad(*d))
+                    for key, d in key_to_dir.items())
 
     def eat_nearest(nomad):
         nomad.as_tactile.eat_nearest()
@@ -122,27 +118,16 @@ def player_commands():
     def combine_objects(nomad):
         nomad.as_tactile.combine_objects()
 
-    def flatten_keys(d):
-        return dict((key, v) for keys, v in d.items() for key in keys)
-
-    KEY = ord
-
-    return flatten_keys({
-        (KEY('k'), KEY_UP):    move_up,
-        (KEY('j'), KEY_DOWN):  move_down,
-        (KEY('h'), KEY_LEFT):  move_left,
-        (KEY('l'), KEY_RIGHT): move_right,
-        (KEY('y'),):           move_upleft,
-        (KEY('u'),):           move_upright,
-        (KEY('b'),):           move_downleft,
-        (KEY('n'),):           move_downright,
-
-        (KEY('w'),): Nomad.wait,
-        (KEY('e'),): eat_nearest,
-        (KEY('g'),): pickup_nearest,
-        (KEY('d'),): drop_all,
-        (KEY('c'),): combine_objects,
+    # Assign all other single-key actions.
+    commands.update({
+        ord('w'): Nomad.wait,
+        ord('e'): eat_nearest,
+        ord('g'): pickup_nearest,
+        ord('d'): drop_all,
+        ord('c'): combine_objects,
         })
+
+    return commands
 
 
 def render_info():

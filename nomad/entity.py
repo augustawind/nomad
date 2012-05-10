@@ -58,17 +58,7 @@ class Entity:
         '''Swizzle for (x, y).''')
 
     def select_in_reach(self):
-        dirs = []
-        for entity in self.get_in_reach():
-            dx = entity.x - self.x
-            if dx:
-                dx /= abs(dx)
-            dy = entity.y - self.y
-            if dy:
-                dy /= abs(dy)
-            dirs.append((dx, dy))
-
-        return interface.ui.select_adjacent_entity(*dirs)
+        return interface.ui.select_adjacent_entity()
     
     def get_in_reach(self):
         in_reach = []
