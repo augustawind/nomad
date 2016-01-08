@@ -1,4 +1,4 @@
-Nomad
+Nomad!
 =====
 An open-ended, dynamically generated adventure game
 ---------------------------------------------------
